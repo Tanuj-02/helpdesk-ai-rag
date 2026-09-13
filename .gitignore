@@ -1,0 +1,13 @@
+# Ignore local database and vector store data inside raghelpdesk
+raghelpdesk/mysql_data/
+raghelpdesk/qdrant_data/
+
+# Ignore IDE settings (present in your root folder)
+.idea/
+
+# Ignore environment variables containing sensitive keys
+**/.env
+**/.env.*
+
+# Ignore standard Maven build directories across all your microservices
+**/target/
