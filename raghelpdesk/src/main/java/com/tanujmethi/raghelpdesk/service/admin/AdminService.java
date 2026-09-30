@@ -1,5 +1,6 @@
 package com.tanujmethi.raghelpdesk.service.admin;
 
+import com.tanujmethi.raghelpdesk.dto.CurrentUser;
 import com.tanujmethi.raghelpdesk.dto.CurrentUserResponse;
 import com.tanujmethi.raghelpdesk.dto.UserResponse;
 import com.tanujmethi.raghelpdesk.entity.User;
@@ -9,6 +10,7 @@ import com.tanujmethi.raghelpdesk.exception.AppException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
+import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,22 +25,22 @@ public class AdminService {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final CompanyRepository companyRepository;
-
-    public AdminService(UserRepository userRepository, AuthService authService, CompanyRepository companyRepository) {
+    private final CurrentUserService currentUserService;
+    public AdminService(UserRepository userRepository, AuthService authService, CompanyRepository companyRepository, CurrentUserService currentUserService) {
         this.userRepository = userRepository;
         this.authService = authService;
         this.companyRepository = companyRepository;
+        this.currentUserService = currentUserService;
     }
 
 
-    public Page<UserResponse> getAllUsers(Pageable pageable, Authentication authentication) {
-        CurrentUserResponse currentUser = authService.getCurrentUser(authentication);
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
 
-        if(currentUser.getRole() != Role.ADMIN){
+        if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
             throw new AppException("Only Admin can see all users");
         }
 
-        Long companyId = currentUser.getCompanyId();
+        Long companyId = currentUserService.getCompanyId();
 
         return userRepository.findAllByCompanyId(companyId, pageable)
                 .map( user -> new UserResponse(
@@ -51,13 +53,12 @@ public class AdminService {
                 );
     }
 
-    public UserResponse getByUserId(Long id, Authentication authentication) {
-        CurrentUserResponse currentUser = authService.getCurrentUser(authentication);
-        if(currentUser.getRole() != Role.ADMIN){
-            throw new AppException("Only admin can see other users");
+    public UserResponse getByUserId(Long id) {
+        if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
+            throw new AppException("Only Admin can see all users");
         }
 
-        Long companyId= currentUser.getCompanyId();
+        Long companyId= currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyId(id, companyId).orElseThrow(
                 () -> new AppException("User with id " + id + " and company id " + companyId + " not found" )
@@ -72,14 +73,13 @@ public class AdminService {
                 .build();
     }
 
-    public UserResponse updateStatus(Long id, Status status, Authentication authentication){
-        CurrentUserResponse currentUserResponse = authService.getCurrentUser(authentication);
+    public UserResponse updateStatus(Long id, Status status){
 
-        if(currentUserResponse.getRole() != Role.ADMIN){
-            throw new AppException("Only admin can change status");
+        if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
+            throw new AppException("Only Admin can see all users");
         }
 
-        Long companyId = currentUserResponse.getCompanyId();
+        Long companyId = currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyIdAndRoleIn(id, companyId, List.of(Role.EMPLOYEE, Role.AGENT)).orElseThrow(
                 () -> new AppException("User with id " + id + " and company id " + companyId + " not found" )
@@ -96,14 +96,13 @@ public class AdminService {
                 .build();
     }
 
-    public UserResponse updateRole(Long id, Role role, Authentication authentication) {
-        CurrentUserResponse currentUser = authService.getCurrentUser(authentication);
+    public UserResponse updateRole(Long id, Role role) {
 
-        if (currentUser.getRole() != Role.ADMIN) {
-            throw new AppException("Only admin can change role");
+        if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
+            throw new AppException("Only Admin can see all users");
         }
 
-        Long companyId = currentUser.getCompanyId();
+        Long companyId = currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyId(id, companyId).orElseThrow(
                 () -> new AppException("User not found")

@@ -19,7 +19,7 @@ public class ChatController {
     }
 
     @GetMapping("/chat")
-    public Flux<String> chat(@RequestParam String query, @RequestParam Long chatId, Authentication authentication){
-        return chatService.chat(query, chatId, authentication);
+    public Flux<String> chat(@RequestParam String query, @RequestParam Long chatId){
+        return chatService.chat(query, chatId);
     }
 }

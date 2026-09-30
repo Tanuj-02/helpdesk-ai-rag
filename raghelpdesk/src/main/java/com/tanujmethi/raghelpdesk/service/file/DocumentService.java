@@ -14,6 +14,7 @@ import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.S3StorageService;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
 import com.tanujmethi.raghelpdesk.messaging.DocumentVerificationPublisher;
+import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -31,26 +32,28 @@ public class DocumentService {
     private final CompanyRepository companyRepository;
     private final FileValidationService fileValidationService;
     private final DocumentVerificationPublisher documentVerificationPublisher;
+    private final CurrentUserService currentUserService;
 
-    public DocumentService(AuthService authService, S3StorageService s3StorageService, CompanyDocumentRepository companyDocumentRepository, CompanyRepository companyRepository, FileValidationService fileValidationService, DocumentVerificationPublisher documentVerificationPublisher) {
+    public DocumentService(AuthService authService, S3StorageService s3StorageService, CompanyDocumentRepository companyDocumentRepository, CompanyRepository companyRepository, FileValidationService fileValidationService, DocumentVerificationPublisher documentVerificationPublisher, CurrentUserService currentUserService) {
         this.authService = authService;
         this.s3StorageService = s3StorageService;
         this.companyDocumentRepository = companyDocumentRepository;
         this.companyRepository = companyRepository;
         this.fileValidationService = fileValidationService;
         this.documentVerificationPublisher = documentVerificationPublisher;
+        this.currentUserService = currentUserService;
     }
 
 
     @Transactional
-    public DocumentResponse uploadDocument(MultipartFile file, DocumentUploadRequest documentUploadRequest, Authentication authentication) throws IOException {
-        CurrentUserResponse currentUser = authService.getCurrentUser(authentication);
+    public DocumentResponse uploadDocument(MultipartFile file, DocumentUploadRequest documentUploadRequest) throws IOException {
 
-        if(currentUser.getRole() != Role.ADMIN){
-            throw new AppException("Only Admins can upload files");
+
+        if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
+            throw new AppException("Only Admin can see all users");
         }
 
-        Long companyId = currentUser.getCompanyId();
+        Long companyId = currentUserService.getCompanyId();
 
         Company company = companyRepository.findById(companyId).orElseThrow(
                 () -> new AppException("Company not found")

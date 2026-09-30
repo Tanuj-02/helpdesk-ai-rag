@@ -23,22 +23,22 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public Page<UserResponse> getAllUser(@PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable, Authentication authentication){
-        return adminService.getAllUsers(pageable, authentication);
+    public Page<UserResponse> getAllUser(@PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable){
+        return adminService.getAllUsers(pageable);
     }
 
     @GetMapping("/user/{id}")
-    public UserResponse getByUserId(@PathVariable Long id ,Authentication authentication){
-        return adminService.getByUserId(id, authentication);
+    public UserResponse getByUserId(@PathVariable Long id){
+        return adminService.getByUserId(id);
     }
 
     @PatchMapping("/user/{id}/status")
-    public UserResponse updateStatus(@PathVariable Long id, @RequestParam Status status, Authentication authentication){
-        return adminService.updateStatus(id,status,authentication);
+    public UserResponse updateStatus(@PathVariable Long id, @RequestParam Status status){
+        return adminService.updateStatus(id,status);
     }
 
     @PatchMapping("/user/{id}/role")
-    public UserResponse updateRole(@PathVariable Long id, @RequestParam Role role, Authentication authentication){
-        return adminService.updateRole(id,role,authentication);
+    public UserResponse updateRole(@PathVariable Long id, @RequestParam Role role){
+        return adminService.updateRole(id,role);
     }
 }

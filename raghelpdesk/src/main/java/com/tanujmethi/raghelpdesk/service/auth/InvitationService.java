@@ -21,21 +21,23 @@ import java.util.Date;
 public class InvitationService {
 
     private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
     private final UserRepository userRepository;
     private final CompanyInvitationRepository companyInvitationRepository;
     private final DocumentVerificationPublisher documentVerificationPublisher;
 
-    public InvitationService(JwtService jwtService, UserRepository userRepository, CompanyInvitationRepository companyInvitationRepository, DocumentVerificationPublisher documentVerificationPublisher) {
+    public InvitationService(JwtService jwtService, CurrentUserService currentUserService, UserRepository userRepository, CompanyInvitationRepository companyInvitationRepository, DocumentVerificationPublisher documentVerificationPublisher) {
         this.jwtService = jwtService;
+        this.currentUserService = currentUserService;
         this.userRepository = userRepository;
         this.companyInvitationRepository = companyInvitationRepository;
         this.documentVerificationPublisher = documentVerificationPublisher;
     }
 
-    public CompanyInvitation sendInvitation(Invitationdto invitationdto, Authentication authentication) {
-        UserDetails currentUser = (UserDetails) authentication.getPrincipal();
+    public CompanyInvitation sendInvitation(Invitationdto invitationdto) {
+        String email = currentUserService.getEmail();
 
-        User adminUser = userRepository.findByEmail(currentUser.getUsername()).orElseThrow(
+        User adminUser = userRepository.findByEmail(email).orElseThrow(
                 () -> {
                     System.out.println("Admin not found");
                     return new AppException("Admin not found");}

@@ -19,7 +19,7 @@ public class InvitationController {
     }
 
     @PostMapping("/send")
-    public CompanyInvitation sendInvitation(@RequestBody Invitationdto invitationdto, Authentication authentication){
-        return invitationService.sendInvitation(invitationdto, authentication);
+    public CompanyInvitation sendInvitation(@RequestBody Invitationdto invitationdto){
+        return invitationService.sendInvitation(invitationdto);
     }
 }
