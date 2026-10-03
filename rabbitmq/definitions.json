@@ -27,6 +27,13 @@
       "type": "direct",
       "durable": true,
       "auto_delete": false
+    },
+    {
+      "name": "email.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false
     }
   ],
   "queues": [
@@ -78,7 +85,7 @@
       "routing_key": "document.vector.routing_key"
     },
     {
-      "source": "document.exchange",
+      "source": "email.exchange",
       "vhost": "/",
       "destination": "document.email.queue",
       "destination_type": "queue",

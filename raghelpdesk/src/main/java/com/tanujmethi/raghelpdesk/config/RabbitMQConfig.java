@@ -15,6 +15,8 @@ public class RabbitMQConfig {
 
     public static final String DOCUMENT_VERIFICATION_EXCHANGE =
             "document.exchange";
+    public static final String EMAIL_EXCHANGE =
+            "email.exchange";
 
     public static final String DOCUMENT_VERIFICATION_ROUTING_KEY =
             "document.verification.requested";

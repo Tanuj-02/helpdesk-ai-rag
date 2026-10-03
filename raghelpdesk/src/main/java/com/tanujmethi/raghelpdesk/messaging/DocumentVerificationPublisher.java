@@ -26,6 +26,6 @@ public class DocumentVerificationPublisher {
     }
 
     public void publishEmail(EmailResponse emailResponse){
-        rabbitTemplate.convertAndSend(RabbitMQConfig.DOCUMENT_VERIFICATION_EXCHANGE, RabbitMQConfig.DOCUMENT_EMAIL_ROUTING_KEY, emailResponse);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.DOCUMENT_EMAIL_ROUTING_KEY, emailResponse);
     }
 }
