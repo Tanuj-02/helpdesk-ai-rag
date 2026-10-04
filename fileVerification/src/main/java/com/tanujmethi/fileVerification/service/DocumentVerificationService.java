@@ -18,10 +18,7 @@ public class DocumentVerificationService {
         this.chatClient = chatClient;
     }
 
-    public DocumentVerificationResult verify(
-            String content,
-            String documentType
-    ) {
+    public DocumentVerificationResult verify(String content, String documentType) {
 
         return chatClient
                 .prompt()

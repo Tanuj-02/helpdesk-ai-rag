@@ -8,10 +8,7 @@ import java.util.List;
 
 @Service
 public class DocumentSamplingService {
-    public List<DocumentChunk> sampleChunks(
-            List<DocumentChunk> chunks,
-            int sampleCount
-    ) {
+    public List<DocumentChunk> sampleChunks(List<DocumentChunk> chunks, int sampleCount) {
 
         if (chunks == null || chunks.isEmpty()) {
             return List.of();

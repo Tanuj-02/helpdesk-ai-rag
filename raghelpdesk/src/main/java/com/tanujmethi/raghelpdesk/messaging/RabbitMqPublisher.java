@@ -8,11 +8,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DocumentVerificationPublisher {
+public class RabbitMqPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public DocumentVerificationPublisher(RabbitTemplate rabbitTemplate) {
+    public RabbitMqPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 

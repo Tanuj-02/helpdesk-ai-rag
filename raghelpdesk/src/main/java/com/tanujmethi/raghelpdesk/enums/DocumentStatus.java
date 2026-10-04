@@ -5,5 +5,6 @@ public enum DocumentStatus {
     PROCESSING,
     APPROVED,
     REJECTED,
-    FAILED
+    FAILED,
+    DELETED
 }

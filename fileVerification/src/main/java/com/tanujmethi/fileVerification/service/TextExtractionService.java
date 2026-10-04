@@ -12,10 +12,7 @@ public class TextExtractionService {
 
     private final Tika tika = new Tika();
 
-    public String extractText(
-            InputStream inputStream,
-            String fileName
-    ) throws IOException {
+    public String extractText(InputStream inputStream, String fileName) throws IOException {
 
         try {
             return tika.parseToString(inputStream);

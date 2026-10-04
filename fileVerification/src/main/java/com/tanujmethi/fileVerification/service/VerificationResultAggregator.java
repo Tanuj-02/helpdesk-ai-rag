@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 @Service
 public class VerificationResultAggregator {
 
-    public DocumentVerificationResult aggregate(
-            List<DocumentVerificationResult> results
-    ) {
+    public DocumentVerificationResult aggregate(List<DocumentVerificationResult> results) {
 
         if (results == null || results.isEmpty()) {
             throw new IllegalArgumentException(

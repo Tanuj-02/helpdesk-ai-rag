@@ -10,12 +10,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DocumentVerificationResultConsumer {
+public class RabbitMqConsumer {
 
     private final CompanyDocumentRepository companyDocumentRepository;
     private final S3StorageService s3StorageService;
 
-    public DocumentVerificationResultConsumer(CompanyDocumentRepository companyDocumentRepository, S3StorageService s3StorageService) {
+    public RabbitMqConsumer(CompanyDocumentRepository companyDocumentRepository, S3StorageService s3StorageService) {
         this.companyDocumentRepository = companyDocumentRepository;
         this.s3StorageService = s3StorageService;
     }
@@ -25,6 +25,10 @@ public class DocumentVerificationResultConsumer {
         CompanyDocument document = companyDocumentRepository.findById(documentVerificationResultDto.getDocumentId()).orElseThrow(
                 () -> new AppException("Company Document Not Found")
         );
+
+        if (document.getStatus() == DocumentStatus.DELETED) {
+            return;
+        }
 
         if(documentVerificationResultDto.isApproved()){
             document.setStatus(DocumentStatus.APPROVED);

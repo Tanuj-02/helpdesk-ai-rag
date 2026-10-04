@@ -6,7 +6,7 @@ import com.tanujmethi.raghelpdesk.entity.CompanyInvitation;
 import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.exception.AppException;
-import com.tanujmethi.raghelpdesk.messaging.DocumentVerificationPublisher;
+import com.tanujmethi.raghelpdesk.messaging.RabbitMqPublisher;
 import com.tanujmethi.raghelpdesk.repository.CompanyInvitationRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
 import com.tanujmethi.raghelpdesk.security.JwtService;
@@ -21,14 +21,14 @@ public class InvitationService {
     private final CurrentUserService currentUserService;
     private final UserRepository userRepository;
     private final CompanyInvitationRepository companyInvitationRepository;
-    private final DocumentVerificationPublisher documentVerificationPublisher;
+    private final RabbitMqPublisher rabbitMqPublisher;
 
-    public InvitationService(JwtService jwtService, CurrentUserService currentUserService, UserRepository userRepository, CompanyInvitationRepository companyInvitationRepository, DocumentVerificationPublisher documentVerificationPublisher) {
+    public InvitationService(JwtService jwtService, CurrentUserService currentUserService, UserRepository userRepository, CompanyInvitationRepository companyInvitationRepository, RabbitMqPublisher rabbitMqPublisher) {
         this.jwtService = jwtService;
         this.currentUserService = currentUserService;
         this.userRepository = userRepository;
         this.companyInvitationRepository = companyInvitationRepository;
-        this.documentVerificationPublisher = documentVerificationPublisher;
+        this.rabbitMqPublisher = rabbitMqPublisher;
     }
 
     public CompanyInvitation sendInvitation(InvitationDto invitationdto) {
@@ -59,7 +59,7 @@ public class InvitationService {
                 .receiverEmail(invitationdto.getEmail())
                 .build();
 
-        documentVerificationPublisher.publishEmail(emailResponse);
+        rabbitMqPublisher.publishEmail(emailResponse);
 
         CompanyInvitation companyInvitation = CompanyInvitation.builder()
                 .token(token)

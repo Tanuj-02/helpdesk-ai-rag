@@ -102,18 +102,12 @@ public class ConversationService {
 
         Long userId = currentUserService.getUserId();
 
-        conversationRepository.findByIdAndUserId(
-                conversationId,
-                userId
-        ).orElseThrow(() ->
-                new AppException("Conversation not found")
+        conversationRepository.findByIdAndUserId(conversationId,userId)
+                .orElseThrow(() -> new AppException("Conversation not found")
         );
 
         return messageRepository
-                .findByConversationIdOrderByCreatedAtDesc(
-                        conversationId,
-                        pageable
-                )
+                .findByConversationIdOrderByCreatedAtDesc(conversationId, pageable)
                 .map(this::convertToResponse);
     }
 
@@ -138,5 +132,18 @@ public class ConversationService {
                         .title(conversation.getTitle())
                         .createdAt(conversation.getCreatedAt())
                         .build());
+    }
+
+    public void updateModel(Long conversationId, String model) {
+        Long userId = currentUserService.getUserId();
+
+        Conversation conversation =
+                conversationRepository
+                        .findByIdAndUserId(conversationId, userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Conversation not found"));
+
+        conversation.setModel(model);
+        conversationRepository.save(conversation);
     }
 }

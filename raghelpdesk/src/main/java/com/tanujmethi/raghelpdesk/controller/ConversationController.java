@@ -46,4 +46,10 @@ public class ConversationController {
     public void updateTitle(@PathVariable Long conversationId, @RequestParam String title) {
         conversationService.updateTitle(conversationId, title);
     }
+
+    @PatchMapping("/{conversationId}/model/{model}")
+    public ResponseEntity<Void> updateModel(@PathVariable Long conversationId, @PathVariable String model) {
+        conversationService.updateModel(conversationId, model);
+        return ResponseEntity.noContent().build();
+    }
 }

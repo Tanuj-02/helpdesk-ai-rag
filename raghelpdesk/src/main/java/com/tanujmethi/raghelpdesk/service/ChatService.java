@@ -1,45 +1,43 @@
 package com.tanujmethi.raghelpdesk.service;
 
-import com.tanujmethi.raghelpdesk.dto.CurrentUserResponse;
+import com.google.genai.Client;
+import com.tanujmethi.raghelpdesk.entity.Company;
 import com.tanujmethi.raghelpdesk.entity.Conversation;
 import com.tanujmethi.raghelpdesk.enums.MessageRole;
-import com.tanujmethi.raghelpdesk.service.auth.AuthService;
+import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import com.tanujmethi.raghelpdesk.tools.TicketTool;
-import io.jsonwebtoken.Jwt;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.document.Document;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatService {
 
-    private final ChatClient chatClient;
     private final VectorStore vectorStore;
     private final CurrentUserService currentUserService;
     private final TicketTool ticketTool;
     private final ConversationService conversationService;
+    private final CompanyRepository companyRepository;
+    private final ChatMemory chatMemory;
 
-    public ChatService(ChatClient chatClient, VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService) {
-        this.chatClient = chatClient;
+    public ChatService(VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService, CompanyRepository companyRepository, ChatMemory chatMemory) {
         this.vectorStore = vectorStore;
         this.currentUserService = currentUserService;
         this.ticketTool = ticketTool;
         this.conversationService = conversationService;
+        this.companyRepository = companyRepository;
+        this.chatMemory = chatMemory;
     }
 
     public Flux<String> chat(String query, Long chatId) {
@@ -50,13 +48,27 @@ public class ChatService {
         Conversation conversation =
                 conversationService.getConversation(chatId);
 
-        conversationService.saveMessage(chatId, MessageRole.USER, query);
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        if (company.getApiKey() == null || company.getApiKey().isBlank()) {
+            throw new RuntimeException("AI API key is not configured");
+        }
+
+        String apiKey = company.getApiKey();
+        ChatClient chatClient = createChatClient(apiKey);
+
+        conversationService.saveMessage(
+                chatId,
+                MessageRole.USER,
+                query
+        );
 
         if (conversation.getTitle() == null) {
 
             CompletableFuture.runAsync(() -> {
 
-                String title = generateTitle(query);
+                String title = generateTitle(query, chatClient);
 
                 conversationService.updateTitle(
                         chatId,
@@ -65,19 +77,28 @@ public class ChatService {
             });
         }
 
-        QuestionAnswerAdvisor questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
-                .searchRequest(SearchRequest.builder()
-                        .topK(10)
-                        .similarityThreshold(0.4)
-                        .filterExpression("companyId == '" + companyId + "'")
-                        .build())
-                .build();
+        QuestionAnswerAdvisor questionAnswerAdvisor =
+                QuestionAnswerAdvisor.builder(vectorStore)
+                        .searchRequest(
+                                SearchRequest.builder()
+                                        .topK(10)
+                                        .similarityThreshold(0.4)
+                                        .filterExpression(
+                                                "companyId == '" + companyId + "'"
+                                        )
+                                        .build()
+                        )
+                        .build();
 
         StringBuilder aiResponse = new StringBuilder();
 
         return chatClient
                 .prompt()
                 .user(query)
+                .options(
+                        GoogleGenAiChatOptions.builder()
+                                .model(conversation.getModel())
+                )
                 .advisors(questionAnswerAdvisor)
                 .tools(ticketTool)
                 .toolContext(Map.of(
@@ -92,29 +113,50 @@ public class ChatService {
                 .stream()
                 .content()
                 .doOnNext(aiResponse::append)
-                .doOnComplete(() -> {
-                    conversationService.saveMessage(
-                            chatId,
-                            MessageRole.ASSISTANT,
-                            aiResponse.toString()
-                    );
-                });
+                .doOnComplete(() ->
+                        conversationService.saveMessage(
+                                chatId,
+                                MessageRole.ASSISTANT,
+                                aiResponse.toString()
+                        )
+                );
     }
 
-    private String generateTitle(String query) {
+    private ChatClient createChatClient(String apiKey) {
+
+        Client genAiClient = Client.builder()
+                .apiKey(apiKey)
+                .build();
+
+        GoogleGenAiChatModel chatModel =
+                GoogleGenAiChatModel.builder()
+                        .genAiClient(genAiClient)
+                        .build();
+
+        return ChatClient.builder(chatModel)
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor
+                                .builder(chatMemory)
+                                .build()
+                )
+                .build();
+    }
+
+    private String generateTitle(String query, ChatClient chatClient) {
 
         return chatClient
                 .prompt("""
-                    Generate a short title for this support conversation.
-                    Rules:
-                    - Maximum 6 words
-                    - No quotation marks
-                    - Do not use "Chat" or "Conversation"
-                    - Describe the user's main issue
+                        Generate a short title for this support conversation.
 
-                    User message:
-                    %s
-                    """.formatted(query))
+                        Rules:
+                        - Maximum 6 words
+                        - No quotation marks
+                        - Do not use "Chat" or "Conversation"
+                        - Describe the user's main issue
+
+                        User message:
+                        %s
+                        """.formatted(query))
                 .call()
                 .content();
     }

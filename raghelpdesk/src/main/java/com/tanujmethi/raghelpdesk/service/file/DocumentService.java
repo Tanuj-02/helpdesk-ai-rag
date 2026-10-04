@@ -1,6 +1,5 @@
 package com.tanujmethi.raghelpdesk.service.file;
 
-import com.tanujmethi.raghelpdesk.dto.CurrentUserResponse;
 import com.tanujmethi.raghelpdesk.dto.DocumentResponse;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadEvent;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadRequest;
@@ -13,14 +12,15 @@ import com.tanujmethi.raghelpdesk.repository.CompanyDocumentRepository;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.S3StorageService;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
-import com.tanujmethi.raghelpdesk.messaging.DocumentVerificationPublisher;
+import com.tanujmethi.raghelpdesk.messaging.RabbitMqPublisher;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.Document;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,16 +31,16 @@ public class DocumentService {
     private final CompanyDocumentRepository companyDocumentRepository;
     private final CompanyRepository companyRepository;
     private final FileValidationService fileValidationService;
-    private final DocumentVerificationPublisher documentVerificationPublisher;
+    private final RabbitMqPublisher rabbitMqPublisher;
     private final CurrentUserService currentUserService;
 
-    public DocumentService(AuthService authService, S3StorageService s3StorageService, CompanyDocumentRepository companyDocumentRepository, CompanyRepository companyRepository, FileValidationService fileValidationService, DocumentVerificationPublisher documentVerificationPublisher, CurrentUserService currentUserService) {
+    public DocumentService(AuthService authService, S3StorageService s3StorageService, CompanyDocumentRepository companyDocumentRepository, CompanyRepository companyRepository, FileValidationService fileValidationService, RabbitMqPublisher rabbitMqPublisher, CurrentUserService currentUserService) {
         this.authService = authService;
         this.s3StorageService = s3StorageService;
         this.companyDocumentRepository = companyDocumentRepository;
         this.companyRepository = companyRepository;
         this.fileValidationService = fileValidationService;
-        this.documentVerificationPublisher = documentVerificationPublisher;
+        this.rabbitMqPublisher = rabbitMqPublisher;
         this.currentUserService = currentUserService;
     }
 
@@ -88,7 +88,7 @@ public class DocumentService {
                 .s3Key(s3Key)
                 .build();
 
-        documentVerificationPublisher.publish(request);
+        rabbitMqPublisher.publish(request);
 
         return DocumentResponse.builder()
                 .id(companyDocument.getId())
@@ -100,6 +100,77 @@ public class DocumentService {
                 .category(companyDocument.getCategory())
                 .status(companyDocument.getStatus())
                 .rejectionReason(companyDocument.getRejectionReason())
+                .build();
+    }
+
+    public List<DocumentResponse> getAllDocuments() {
+        Long companyId = currentUserService.getCompanyId();
+
+        if(!currentUserService.getRole().equals(Role.ADMIN)){
+            throw new AppException("Ony admin can see documents");
+        }
+
+        List<CompanyDocument> documents = companyDocumentRepository.findByCompanyId(companyId);
+
+        return documents.stream()
+                .map(x -> DocumentResponse.builder()
+                        .id(x.getId())
+                        .title(x.getTitle())
+                        .fileName(x.getFileName())
+                        .companyId(companyId)
+                        .fileSize(x.getFileSize())
+                        .contentType(x.getContentType())
+                        .category(x.getCategory())
+                        .status(x.getStatus())
+                        .rejectionReason(x.getRejectionReason())
+                        .build())
+                .toList();
+    }
+
+    public DocumentResponse getDocumentById(Long id) {
+        if(!currentUserService.getRole().equals(Role.ADMIN)){
+            throw new AppException("Only admin can see documents");
+        }
+        Long companyId = currentUserService.getCompanyId();
+
+        CompanyDocument document = companyDocumentRepository.findByIdAndCompanyId(id, companyId).orElseThrow();
+
+        return DocumentResponse.builder()
+                .id(id)
+                .title(document.getTitle())
+                .fileName(document.getFileName())
+                .companyId(companyId)
+                .fileSize(document.getFileSize())
+                .contentType(document.getContentType())
+                .category(document.getCategory())
+                .status(document.getStatus())
+                .rejectionReason(document.getRejectionReason())
+                .build();
+    }
+
+    public DocumentResponse deleteDocumentById(Long id) {
+        if(!currentUserService.getRole().equals(Role.ADMIN)){
+            throw new AppException("Only admin can see documents");
+        }
+        Long companyId = currentUserService.getCompanyId();
+
+        CompanyDocument document = companyDocumentRepository.findByIdAndCompanyId(id, companyId).orElseThrow();
+
+        document.setStatus(DocumentStatus.DELETED);
+        s3StorageService.delete(document.getS3Key());
+
+        companyDocumentRepository.save(document);
+
+        return DocumentResponse.builder()
+                .id(id)
+                .title(document.getTitle())
+                .fileName(document.getFileName())
+                .companyId(companyId)
+                .fileSize(document.getFileSize())
+                .contentType(document.getContentType())
+                .category(document.getCategory())
+                .status(document.getStatus())
+                .rejectionReason(document.getRejectionReason())
                 .build();
     }
 }
