@@ -141,9 +141,9 @@ public class AuthService {
     }
 
     public CurrentUserResponse getCurrentUser(Authentication authentication){
-        UserDetails currentUser = (UserDetails) authentication.getPrincipal();
+        CurrentUser currentUser = (CurrentUser) authentication.getPrincipal();
 
-        User user = userRepository.findByEmail(currentUser.getUsername()).orElseThrow(
+        User user = userRepository.findByEmail(currentUser.email()).orElseThrow(
                 () -> new AppException("User not found")
         );
 

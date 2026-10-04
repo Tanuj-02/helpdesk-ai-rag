@@ -1,5 +1,6 @@
 package com.tanujmethi.raghelpdesk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.enums.Status;
 import jakarta.persistence.*;
@@ -25,10 +26,12 @@ public class User {
     private Status status;
     @CreationTimestamp
     private LocalDateTime createAt;
+    @JsonIgnore
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
+    private Long tokenVersion = 0L;
 }

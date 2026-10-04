@@ -35,7 +35,7 @@ public class ConversationService {
         this.companyRepository = companyRepository;
     }
 
-    public Conversation createConversation(){
+    public ConversationResponse createConversation(){
         Long userId = currentUserService.getUserId();
         Long companyId = currentUserService.getCompanyId();
 
@@ -52,11 +52,18 @@ public class ConversationService {
                 .company(company)
                 .build();
 
-        return conversationRepository.save(conversation);
+        conversationRepository.save(conversation);
+
+        return ConversationResponse.builder()
+                .createdAt(conversation.getCreatedAt())
+                .id(conversation.getId())
+                .title(conversation.getTitle())
+                .build();
     }
 
     public void saveMessage(Long conversationId, MessageRole role, String content){
-        Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(
+        Long userId = currentUserService.getUserId();;
+        Conversation conversation = conversationRepository.findByIdAndUserId(conversationId, userId).orElseThrow(
                 () -> new AppException("Conversation not found")
         );
 
@@ -70,9 +77,9 @@ public class ConversationService {
     }
 
     public void updateTitle(Long conversationId, String title) {
-
+        Long userId = currentUserService.getUserId();
         Conversation conversation = conversationRepository
-                .findById(conversationId)
+                .findByIdAndUserId(conversationId,userId)
                 .orElseThrow(() ->
                         new AppException("Conversation not found"));
 
@@ -82,7 +89,8 @@ public class ConversationService {
     }
 
     public Conversation getConversation(Long chatId) {
-        return conversationRepository.findById(chatId).orElseThrow(
+        Long userId = currentUserService.getUserId();
+        return conversationRepository.findByIdAndUserId(chatId,userId).orElseThrow(
                 () -> new AppException("Conversation not found")
         );
     }

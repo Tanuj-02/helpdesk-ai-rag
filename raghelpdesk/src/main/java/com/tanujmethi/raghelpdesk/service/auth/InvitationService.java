@@ -1,7 +1,7 @@
 package com.tanujmethi.raghelpdesk.service.auth;
 
 import com.tanujmethi.raghelpdesk.dto.EmailResponse;
-import com.tanujmethi.raghelpdesk.dto.Invitationdto;
+import com.tanujmethi.raghelpdesk.dto.InvitationDto;
 import com.tanujmethi.raghelpdesk.entity.CompanyInvitation;
 import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
@@ -10,12 +10,9 @@ import com.tanujmethi.raghelpdesk.messaging.DocumentVerificationPublisher;
 import com.tanujmethi.raghelpdesk.repository.CompanyInvitationRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
 import com.tanujmethi.raghelpdesk.security.JwtService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 public class InvitationService {
@@ -34,7 +31,7 @@ public class InvitationService {
         this.documentVerificationPublisher = documentVerificationPublisher;
     }
 
-    public CompanyInvitation sendInvitation(Invitationdto invitationdto) {
+    public CompanyInvitation sendInvitation(InvitationDto invitationdto) {
         String email = currentUserService.getEmail();
 
         User adminUser = userRepository.findByEmail(email).orElseThrow(

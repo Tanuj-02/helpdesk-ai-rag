@@ -21,7 +21,7 @@ public class ConversationController {
     }
 
     @PostMapping
-    public Conversation createConversation(){
+    public ConversationResponse createConversation(){
         return conversationService.createConversation();
     }
 
@@ -43,7 +43,7 @@ public class ConversationController {
     }
 
     @PatchMapping("/{conversationId}/title")
-    public void updateTitle(@PathVariable String title, @RequestParam Long conversationId){
+    public void updateTitle(@PathVariable Long conversationId, @RequestParam String title) {
         conversationService.updateTitle(conversationId, title);
     }
 }

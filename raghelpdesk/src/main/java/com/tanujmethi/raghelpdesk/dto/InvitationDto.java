@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Invitationdto {
+public class InvitationDto {
     private String email;
     private Role role;
     private User invitedBy;

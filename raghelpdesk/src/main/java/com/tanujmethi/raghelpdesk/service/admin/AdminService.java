@@ -86,6 +86,7 @@ public class AdminService {
         );
 
         user.setStatus(status);
+        user.setTokenVersion(user.getTokenVersion()+1);
         userRepository.save(user);
         return UserResponse.builder()
                 .id(user.getId())
@@ -109,6 +110,7 @@ public class AdminService {
         );
 
         user.setRole(role);
+        user.setTokenVersion(user.getTokenVersion()+1);
         userRepository.save(user);
 
         return UserResponse.builder()
