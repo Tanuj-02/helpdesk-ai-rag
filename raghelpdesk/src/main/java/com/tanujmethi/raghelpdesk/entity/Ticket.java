@@ -41,4 +41,7 @@ public class Ticket {
     private TicketPriority ticketPriority;
     @Enumerated(EnumType.STRING)
     private TicketStatus ticketStatus;
+    @Lob
+    private String description;
+    private Long conversationId;
 }

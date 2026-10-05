@@ -32,7 +32,7 @@ public class TicketTool {
     public Object createTicket(
             @ToolParam(description = "Short summary/title of the issue") String subject,
             @ToolParam(description = "Internal AI summary of issue and troubleshooting steps attempted") String aiSummary,
-            @ToolParam(description = "Current chat conversation ID") String conversationId,
+            @ToolParam(description = "Current chat conversation ID") Long conversationId,
             @ToolParam(description = "Priority: LOW, MEDIUM, HIGH, or URGENT")
             String priority,
             @ToolParam(description = "Category such as Account, Billing, Technical, Hardware, Software, or Other")

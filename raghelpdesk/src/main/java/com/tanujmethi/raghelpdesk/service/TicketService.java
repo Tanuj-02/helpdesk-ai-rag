@@ -64,45 +64,15 @@ public class TicketService {
 
     public TicketResponse createTicket(CreateTicketRequest createTicketRequest, Long userId, Long companyId) {
 
-        long start = System.currentTimeMillis();
-
-        System.out.println("========== CREATE TICKET START ==========");
-
-        System.out.println("User ID: " + userId);
-
-        long t1 = System.currentTimeMillis();
-
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppException("User not found")
         );
-
-        System.out.println("User lookup: "
-                + (System.currentTimeMillis() - t1) + " ms");
-
-        System.out.println("Company ID: " + companyId);
-
-        long t2 = System.currentTimeMillis();
 
         Company company = companyRepository.findById(companyId).orElseThrow(
                 () -> new AppException("Company not found")
         );
 
-        System.out.println("Company lookup: "
-                + (System.currentTimeMillis() - t2) + " ms");
-
-
-        long t3 = System.currentTimeMillis();
-
-        System.out.println("Finding least busy agent...");
-
         User agent = agentAssignmentService.leastBusyAgent(companyId);
-
-        System.out.println("Agent lookup: "
-                + (System.currentTimeMillis() - t3) + " ms");
-
-        System.out.println("Agent ID: " +
-                (agent != null ? agent.getId() : null));
-
 
         Ticket ticket = Ticket.builder()
                 .user(user)
@@ -113,25 +83,13 @@ public class TicketService {
                 .subject(createTicketRequest.getSubject())
                 .aiSummary(createTicketRequest.getAiSummary())
                 .category(createTicketRequest.getCategory())
+                .description(createTicketRequest.getDescription())
+                .conversationId(createTicketRequest.getConversationId())
                 .build();
-
-
-        long t4 = System.currentTimeMillis();
-
-        System.out.println("Saving ticket...");
 
         ticketRepository.save(ticket);
 
-        System.out.println("Ticket save: "
-                + (System.currentTimeMillis() - t4) + " ms");
-
-
         TicketResponse response = convertToResponse(ticket);
-
-        System.out.println("TOTAL CREATE TICKET TIME: "
-                + (System.currentTimeMillis() - start) + " ms");
-
-        System.out.println("========== CREATE TICKET END ==========");
 
         return response;
     }
@@ -243,6 +201,8 @@ public class TicketService {
                 .aiSummary(ticket.getAiSummary())
                 .createdAt(ticket.getCreatedAt())
                 .category(ticket.getCategory())
+                .conversationId(ticket.getConversationId())
+                .description(ticket.getDescription())
                 .build();
     }
 }

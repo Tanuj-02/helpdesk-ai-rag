@@ -11,7 +11,8 @@ import lombok.*;
 public class CreateTicketRequest {
     private String subject;
     private String aiSummary;
-    private String conversationId;
+    private Long conversationId;
+    private String description;
     private String category;
     private TicketPriority ticketPriority;
 }

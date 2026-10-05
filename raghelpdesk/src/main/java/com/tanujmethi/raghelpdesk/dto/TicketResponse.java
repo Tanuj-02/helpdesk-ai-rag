@@ -23,6 +23,9 @@ public class TicketResponse {
     private String subject;
     @Lob
     private String aiSummary;
+    @Lob
+    private String description;
     private LocalDateTime createdAt;
+    private Long conversationId;
 
 }
