@@ -1,6 +1,7 @@
 package com.tanujmethi.raghelpdesk.messaging;
 
 import com.tanujmethi.raghelpdesk.config.RabbitMQConfig;
+import com.tanujmethi.raghelpdesk.dto.ChatRequest;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadEvent;
 
 import com.tanujmethi.raghelpdesk.dto.EmailResponse;
@@ -27,5 +28,9 @@ public class RabbitMqPublisher {
 
     public void publishEmail(EmailResponse emailResponse){
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.DOCUMENT_EMAIL_ROUTING_KEY, emailResponse);
+    }
+
+    public void publishChat(ChatRequest chatRequest){
+        rabbitTemplate.convertAndSend(RabbitMQConfig.CHAT_EXCHANGE, RabbitMQConfig.CHAT_ROUTING_KEY, chatRequest);
     }
 }

@@ -13,15 +13,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String DOCUMENT_VERIFICATION_EXCHANGE =
-            "document.exchange";
-    public static final String EMAIL_EXCHANGE =
-            "email.exchange";
+    public static final String DOCUMENT_VERIFICATION_EXCHANGE = "document.exchange";
+    public static final String EMAIL_EXCHANGE = "email.exchange";
+    public static final String CHAT_EXCHANGE = "chat.exchange";
 
-    public static final String DOCUMENT_VERIFICATION_ROUTING_KEY =
-            "document.verification.requested";
-    public static final String DOCUMENT_EMAIL_ROUTING_KEY =
-            "document.email.routing_key";
+    public static final String DOCUMENT_VERIFICATION_ROUTING_KEY = "document.verification.requested";
+    public static final String DOCUMENT_EMAIL_ROUTING_KEY = "document.email.routing_key";
+    public static final String CHAT_ROUTING_KEY = "document.chat.routing_key";
 
 
     public static final String DOCUMENT_VERIFICATION_RESULT_EXCHANGE =
@@ -81,13 +79,9 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(
-            ConnectionFactory connectionFactory,
-            JacksonJsonMessageConverter messageConverter
-    ) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, JacksonJsonMessageConverter messageConverter) {
 
-        RabbitTemplate rabbitTemplate =
-                new RabbitTemplate(connectionFactory);
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 
         rabbitTemplate.setMessageConverter(messageConverter);
 

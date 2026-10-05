@@ -29,6 +29,13 @@
       "auto_delete": false
     },
     {
+      "name": "chat.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
       "name": "email.exchange",
       "vhost": "/",
       "type": "direct",
@@ -51,6 +58,12 @@
     },
     {
       "name": "document.vector.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
+      "name": "document.chat.queue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false
@@ -90,6 +103,13 @@
       "destination": "document.email.queue",
       "destination_type": "queue",
       "routing_key": "document.email.routing_key"
+    },
+    {
+      "source": "chat.exchange",
+      "vhost": "/",
+      "destination": "document.chat.queue",
+      "destination_type": "queue",
+      "routing_key": "document.chat.routing_key"
     }
   ]
 }
