@@ -11,7 +11,6 @@ import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
-import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;

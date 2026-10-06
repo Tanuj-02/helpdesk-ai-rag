@@ -15,6 +15,7 @@ import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -22,7 +23,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class ChatService {
+public class AiChatService {
+
+    @Value("${spring.ai.google.genai.chat.model}")
+    private String defaultModel;
 
     private final VectorStore vectorStore;
     private final CurrentUserService currentUserService;
@@ -31,7 +35,7 @@ public class ChatService {
     private final CompanyRepository companyRepository;
     private final ChatMemory chatMemory;
 
-    public ChatService(VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService, CompanyRepository companyRepository, ChatMemory chatMemory) {
+    public AiChatService(VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService, CompanyRepository companyRepository, ChatMemory chatMemory) {
         this.vectorStore = vectorStore;
         this.currentUserService = currentUserService;
         this.ticketTool = ticketTool;
@@ -40,13 +44,23 @@ public class ChatService {
         this.chatMemory = chatMemory;
     }
 
-    public Flux<String> chat(String query, Long chatId) {
+    public Flux<String> chat(String query, Long chatId, String model) {
 
         Long companyId = currentUserService.getCompanyId();
         Long userId = currentUserService.getUserId();
 
         Conversation conversation =
                 conversationService.getConversation(chatId);
+
+        String selectedModel = model;
+
+        if (selectedModel == null || selectedModel.isBlank()) {
+            selectedModel = conversation.getModel();
+        }
+
+        if (selectedModel == null || selectedModel.isBlank()) {
+            selectedModel = defaultModel;
+        }
 
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
@@ -60,6 +74,7 @@ public class ChatService {
 
         conversationService.saveMessage(
                 chatId,
+                userId,
                 MessageRole.USER,
                 query
         );
@@ -72,7 +87,8 @@ public class ChatService {
 
                 conversationService.updateTitle(
                         chatId,
-                        title
+                        title,
+                        userId
                 );
             });
         }
@@ -97,7 +113,7 @@ public class ChatService {
                 .user(query)
                 .options(
                         GoogleGenAiChatOptions.builder()
-                                .model(conversation.getModel())
+                                .model(selectedModel)
                 )
                 .advisors(questionAnswerAdvisor)
                 .tools(ticketTool)
@@ -116,6 +132,7 @@ public class ChatService {
                 .doOnComplete(() ->
                         conversationService.saveMessage(
                                 chatId,
+                                userId,
                                 MessageRole.ASSISTANT,
                                 aiResponse.toString()
                         )

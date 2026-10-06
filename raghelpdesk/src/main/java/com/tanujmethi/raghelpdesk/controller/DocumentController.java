@@ -55,18 +55,6 @@ public class DocumentController {
                 .body(document);
     }
 
-    @PatchMapping("/apiKey")
-    public ResponseEntity<String> addApiKey(@RequestBody ApiKeyRequest apiKeyRequest){
-        Long companyId = currentUserService.getCompanyId();
-        if(!currentUserService.getRole().equals(Role.ADMIN)){
-            return ResponseEntity.badRequest().body("only admin can set api key");
-        }
-        Company company = companyRepository.findById(companyId).orElseThrow(null);
-        company.setApiKey(apiKeyRequest.getApiKey());
-        companyRepository.save(company);
-        return ResponseEntity.accepted().body("Api key added successfully");
-    }
-
     @GetMapping
     public List<DocumentResponse> getAllDocuments(){
         return documentService.getAllDocuments();

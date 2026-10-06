@@ -4,6 +4,7 @@ import com.tanujmethi.raghelpdesk.dto.ConversationResponse;
 import com.tanujmethi.raghelpdesk.dto.MessageResponse;
 import com.tanujmethi.raghelpdesk.entity.Conversation;
 import com.tanujmethi.raghelpdesk.service.ConversationService;
+import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/conversation")
 public class ConversationController {
     private final ConversationService conversationService;
+    private final CurrentUserService currentUserService;
 
-    public ConversationController(ConversationService conversationService) {
+    public ConversationController(ConversationService conversationService, CurrentUserService currentUserService) {
         this.conversationService = conversationService;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping
@@ -44,7 +47,7 @@ public class ConversationController {
 
     @PatchMapping("/{conversationId}/title")
     public void updateTitle(@PathVariable Long conversationId, @RequestParam String title) {
-        conversationService.updateTitle(conversationId, title);
+        conversationService.updateTitle(conversationId, title, currentUserService.getUserId());
     }
 
     @PatchMapping("/{conversationId}/model/{model}")

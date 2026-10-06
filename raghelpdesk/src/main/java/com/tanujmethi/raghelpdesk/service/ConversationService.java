@@ -61,8 +61,7 @@ public class ConversationService {
                 .build();
     }
 
-    public void saveMessage(Long conversationId, MessageRole role, String content){
-        Long userId = currentUserService.getUserId();;
+    public void saveMessage(Long conversationId, Long userId, MessageRole role, String content){
         Conversation conversation = conversationRepository.findByIdAndUserId(conversationId, userId).orElseThrow(
                 () -> new AppException("Conversation not found")
         );
@@ -76,8 +75,7 @@ public class ConversationService {
         messageRepository.save(message);
     }
 
-    public void updateTitle(Long conversationId, String title) {
-        Long userId = currentUserService.getUserId();
+    public void updateTitle(Long conversationId, String title, Long userId) {
         Conversation conversation = conversationRepository
                 .findByIdAndUserId(conversationId,userId)
                 .orElseThrow(() ->

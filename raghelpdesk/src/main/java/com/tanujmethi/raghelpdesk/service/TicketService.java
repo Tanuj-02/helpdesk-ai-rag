@@ -173,8 +173,13 @@ public class TicketService {
                 .findByIdAndCompanyId(ticketId, companyId)
                 .orElseThrow(() -> new AppException("Ticket not found"));
 
-        if (!ticket.getUser().getId().equals(userId)) {
-            throw new AppException("You can only view your own tickets");
+        boolean isOwner = ticket.getUser().getId().equals(userId);
+        boolean isAdmin = currentUserService.getRole().equals(Role.ADMIN);
+        boolean isAssignedAgent = ticket.getAgent() != null
+                && ticket.getAgent().getId().equals(userId);
+
+        if (!isOwner && !isAdmin && !isAssignedAgent) {
+            throw new AppException("You are not authorized to view this ticket");
         }
 
         return convertToResponse(ticket);
