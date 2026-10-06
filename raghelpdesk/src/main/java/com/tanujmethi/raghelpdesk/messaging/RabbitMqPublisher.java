@@ -5,6 +5,7 @@ import com.tanujmethi.raghelpdesk.dto.ChatRequest;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadEvent;
 
 import com.tanujmethi.raghelpdesk.dto.EmailResponse;
+import com.tanujmethi.raghelpdesk.dto.UrgentEmailResponse;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +28,14 @@ public class RabbitMqPublisher {
     }
 
     public void publishEmail(EmailResponse emailResponse){
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.DOCUMENT_EMAIL_ROUTING_KEY, emailResponse);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.INVITATION_EMAIL_ROUTING_KEY, emailResponse);
     }
 
     public void publishChat(ChatRequest chatRequest){
         rabbitTemplate.convertAndSend(RabbitMQConfig.CHAT_EXCHANGE, RabbitMQConfig.CHAT_ROUTING_KEY, chatRequest);
+    }
+
+    public void publishUrgentEmail(UrgentEmailResponse urgentEmailResponse){
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.URGENT_EMAIL_ROUTING_KEY, urgentEmailResponse);
     }
 }

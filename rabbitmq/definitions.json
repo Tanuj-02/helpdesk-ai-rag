@@ -69,7 +69,13 @@
       "auto_delete": false
     },
     {
-      "name": "document.email.queue",
+      "name": "invitation.email.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
+      "name": "urgent.email.queue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false
@@ -100,9 +106,16 @@
     {
       "source": "email.exchange",
       "vhost": "/",
-      "destination": "document.email.queue",
+      "destination": "invitation.email.queue",
       "destination_type": "queue",
-      "routing_key": "document.email.routing_key"
+      "routing_key": "invitation.email.routing_key"
+    },
+    {
+      "source": "email.exchange",
+      "vhost": "/",
+      "destination": "urgent.email.queue",
+      "destination_type": "queue",
+      "routing_key": "urgent.email.routing_key"
     },
     {
       "source": "chat.exchange",

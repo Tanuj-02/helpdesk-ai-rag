@@ -14,7 +14,7 @@ public class EmailConsumer {
         this.emailService = emailService;
     }
 
-    @RabbitListener(queues = "document.email.queue")
+    @RabbitListener(queues = "invitation.email.queue")
     public void consumer(EmailRequest emailRequest){
         emailService.sendEmail(emailRequest);
     }

@@ -11,3 +11,4 @@ raghelpdesk/qdrant_data/
 
 # Ignore standard Maven build directories across all your microservices
 **/target/
+**/*.log

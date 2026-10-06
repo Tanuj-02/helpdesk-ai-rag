@@ -29,7 +29,5 @@ public class Company {
     private LocalDateTime createAt;
     @JsonIgnore
     private String apiKey;
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
     private LocalDateTime apiUpdatedAt;
 }

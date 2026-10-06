@@ -10,9 +10,9 @@ import lombok.*;
 @Setter
 @Builder
 public class UrgentEmailResponse {
-    private Long userId;
+    private String agentEmail;
     private String subject;
-    private String conversationId;
+    private Long conversationId;
     @Lob
     private String aiSummary;
     private TicketPriority ticketPriority;

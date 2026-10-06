@@ -1,14 +1,18 @@
 package com.tanujmethi.raghelpdesk.service;
 
+import com.tanujmethi.raghelpdesk.dto.ChatRequest;
 import com.tanujmethi.raghelpdesk.dto.CreateTicketRequest;
 import com.tanujmethi.raghelpdesk.dto.TicketResponse;
 import com.tanujmethi.raghelpdesk.dto.UpdateTicketRequest;
+import com.tanujmethi.raghelpdesk.dto.UrgentEmailResponse;
 import com.tanujmethi.raghelpdesk.entity.Company;
 import com.tanujmethi.raghelpdesk.entity.Ticket;
 import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
+import com.tanujmethi.raghelpdesk.enums.TicketPriority;
 import com.tanujmethi.raghelpdesk.enums.TicketStatus;
 import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.messaging.RabbitMqPublisher;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.TicketRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
@@ -26,13 +30,15 @@ public class TicketService {
     private final CompanyRepository companyRepository;
     private final CurrentUserService currentUserService;
     private final AgentAssignmentService agentAssignmentService;
+    private final RabbitMqPublisher rabbitMqPublisher;
 
-    public TicketService(TicketRepository ticketRepository, UserRepository userRepository, CompanyRepository companyRepository, CurrentUserService currentUserService, AgentAssignmentService agentAssignmentService) {
+    public TicketService(TicketRepository ticketRepository, UserRepository userRepository, CompanyRepository companyRepository, CurrentUserService currentUserService, AgentAssignmentService agentAssignmentService, RabbitMqPublisher rabbitMqPublisher) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.currentUserService = currentUserService;
         this.agentAssignmentService = agentAssignmentService;
+        this.rabbitMqPublisher = rabbitMqPublisher;
     }
 
 //    public TicketResponse createTicket(CreateTicketRequest createTicketRequest){
@@ -88,6 +94,27 @@ public class TicketService {
                 .build();
 
         ticketRepository.save(ticket);
+
+        ChatRequest chatRequest = ChatRequest.builder()
+                .ticketId(ticket.getId())
+                .userId(userId)
+                .agentId(agent != null ? agent.getId() : null)
+                .companyId(companyId)
+                .build();
+        rabbitMqPublisher.publishChat(chatRequest);
+
+        if (ticket.getTicketPriority() == TicketPriority.URGENT) {
+
+            UrgentEmailResponse email = UrgentEmailResponse.builder()
+                    .agentEmail(agent.getEmail())
+                    .subject(ticket.getSubject())
+                    .conversationId(ticket.getConversationId())
+                    .aiSummary(ticket.getAiSummary())
+                    .ticketPriority(ticket.getTicketPriority())
+                    .build();
+
+            rabbitMqPublisher.publishUrgentEmail(email);
+        }
 
         TicketResponse response = convertToResponse(ticket);
 
