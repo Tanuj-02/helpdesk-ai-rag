@@ -63,6 +63,12 @@
       "auto_delete": false
     },
     {
+      "name": "document.vector.delete.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
       "name": "document.chat.queue",
       "vhost": "/",
       "durable": true,
@@ -102,6 +108,13 @@
       "destination": "document.vector.queue",
       "destination_type": "queue",
       "routing_key": "document.vector.routing_key"
+    },
+    {
+      "source": "document.exchange",
+      "vhost": "/",
+      "destination": "document.vector.delete.queue",
+      "destination_type": "queue",
+      "routing_key": "document.vector.delete.routing_key"
     },
     {
       "source": "email.exchange",

@@ -1,11 +1,8 @@
 package com.tanujmethi.raghelpdesk.messaging;
 
 import com.tanujmethi.raghelpdesk.config.RabbitMQConfig;
-import com.tanujmethi.raghelpdesk.dto.ChatRequest;
-import com.tanujmethi.raghelpdesk.dto.DocumentUploadEvent;
+import com.tanujmethi.raghelpdesk.dto.*;
 
-import com.tanujmethi.raghelpdesk.dto.EmailResponse;
-import com.tanujmethi.raghelpdesk.dto.UrgentEmailResponse;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +17,7 @@ public class RabbitMqPublisher {
 
     public void publish(DocumentUploadEvent request) {
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.DOCUMENT_VERIFICATION_EXCHANGE,
-                RabbitMQConfig.DOCUMENT_VERIFICATION_ROUTING_KEY,
-                request
-        );
+        rabbitTemplate.convertAndSend(RabbitMQConfig.DOCUMENT_VERIFICATION_EXCHANGE, RabbitMQConfig.DOCUMENT_VERIFICATION_ROUTING_KEY, request);
     }
 
     public void publishEmail(EmailResponse emailResponse){
@@ -37,5 +30,9 @@ public class RabbitMqPublisher {
 
     public void publishUrgentEmail(UrgentEmailResponse urgentEmailResponse){
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.URGENT_EMAIL_ROUTING_KEY, urgentEmailResponse);
+    }
+
+    public void publishDeleteVector(VectorDocumentDeleteEvent vectorDocumentDeleteEvent){
+        rabbitTemplate.convertAndSend(RabbitMQConfig.DOCUMENT_VERIFICATION_EXCHANGE, RabbitMQConfig.DOCUMENT_VECTOR_DELETE_ROUTING_KEY, vectorDocumentDeleteEvent);
     }
 }
