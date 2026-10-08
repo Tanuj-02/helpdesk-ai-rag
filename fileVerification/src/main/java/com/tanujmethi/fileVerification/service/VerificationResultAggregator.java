@@ -12,9 +12,7 @@ public class VerificationResultAggregator {
     public DocumentVerificationResult aggregate(List<DocumentVerificationResult> results) {
 
         if (results == null || results.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "No verification results available"
-            );
+            throw new IllegalArgumentException("No verification results available");
         }
 
         long relevantCount = results.stream()
@@ -29,22 +27,18 @@ public class VerificationResultAggregator {
                 .filter(DocumentVerificationResult::isHelpdeskKnowledge)
                 .count();
 
-        double averageConfidence =
-                results.stream()
+        double averageConfidence = results.stream()
                         .mapToDouble(
                                 DocumentVerificationResult::getConfidence
                         )
                         .average()
                         .orElse(0.0);
 
-        boolean relevant =
-                relevantCount >= Math.ceil(results.size() * 0.6);
+        boolean relevant = relevantCount >= Math.ceil(results.size() * 0.6);
 
-        boolean appropriate =
-                appropriateCount >= Math.ceil(results.size() * 0.6);
+        boolean appropriate = appropriateCount >= Math.ceil(results.size() * 0.6);
 
-        boolean helpdeskKnowledge =
-                helpdeskCount >= Math.ceil(results.size() * 0.6);
+        boolean helpdeskKnowledge = helpdeskCount >= Math.ceil(results.size() * 0.6);
 
         String reason = results.stream()
                 .map(DocumentVerificationResult::getReason)

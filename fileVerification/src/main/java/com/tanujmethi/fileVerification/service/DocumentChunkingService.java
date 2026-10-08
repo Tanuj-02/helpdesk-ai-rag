@@ -25,10 +25,7 @@ public class DocumentChunkingService {
 
         while (start < text.length()) {
 
-            int end = Math.min(
-                    start + CHUNK_SIZE,
-                    text.length()
-            );
+            int end = Math.min(start + CHUNK_SIZE, text.length());
 
             String content = text.substring(start, end);
 
@@ -39,9 +36,7 @@ public class DocumentChunkingService {
                             .build()
             );
 
-            if (end == text.length()) {
-                break;
-            }
+            if (end == text.length()) break;
 
             start = end - CHUNK_OVERLAP;
         }

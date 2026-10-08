@@ -1,7 +1,7 @@
 package com.tanujmethi.ticketChatService.config;
 
 import com.tanujmethi.ticketChatService.dto.ChatUserDetails;
-import com.tanujmethi.ticketChatService.security.jwtService;
+import com.tanujmethi.ticketChatService.security.JwtService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -17,9 +17,9 @@ import java.util.List;
 @Component
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
-    private final jwtService jwtService;
+    private final JwtService jwtService;
 
-    public WebSocketAuthInterceptor(jwtService jwtService) {
+    public WebSocketAuthInterceptor(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 

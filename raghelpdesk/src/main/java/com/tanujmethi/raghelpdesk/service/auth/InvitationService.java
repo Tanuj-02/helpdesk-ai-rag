@@ -1,5 +1,6 @@
 package com.tanujmethi.raghelpdesk.service.auth;
 
+import com.tanujmethi.raghelpdesk.dto.CompanyInvitationResponse;
 import com.tanujmethi.raghelpdesk.dto.EmailResponse;
 import com.tanujmethi.raghelpdesk.dto.InvitationDto;
 import com.tanujmethi.raghelpdesk.entity.CompanyInvitation;
@@ -31,7 +32,7 @@ public class InvitationService {
         this.rabbitMqPublisher = rabbitMqPublisher;
     }
 
-    public CompanyInvitation sendInvitation(InvitationDto invitationdto) {
+    public CompanyInvitationResponse sendInvitation(InvitationDto invitationdto) {
         String email = currentUserService.getEmail();
 
         User adminUser = userRepository.findByEmail(email).orElseThrow(
@@ -70,6 +71,19 @@ public class InvitationService {
                 .invitedBy(adminUser)
                 .build();
 
-        return companyInvitationRepository.save(companyInvitation);
+        companyInvitationRepository.save(companyInvitation);
+
+        return CompanyInvitationResponse.builder()
+                .id(companyInvitation.getId())
+                .companyName(adminUser.getCompany().getName())
+                .companyId(companyId)
+                .email(invitationdto.getEmail())
+                .token(token)
+                .createAt(companyInvitation.getCreateAt())
+                .used(companyInvitation.isUsed())
+                .expiresAt(companyInvitation.getExpiresAt())
+                .invitedById(adminUser.getId())
+                .invitedByName(adminUser.getName())
+                .build();
     }
 }

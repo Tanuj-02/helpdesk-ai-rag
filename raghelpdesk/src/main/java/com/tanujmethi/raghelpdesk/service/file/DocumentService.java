@@ -106,7 +106,7 @@ public class DocumentService {
     public List<DocumentResponse> getAllDocuments() {
         Long companyId = currentUserService.getCompanyId();
 
-        if(!currentUserService.getRole().equals(Role.ADMIN)){
+        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
             throw new AppException("Ony admin can see documents");
         }
 
@@ -128,7 +128,7 @@ public class DocumentService {
     }
 
     public DocumentResponse getDocumentById(Long id) {
-        if(!currentUserService.getRole().equals(Role.ADMIN)){
+        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
             throw new AppException("Only admin can see documents");
         }
         Long companyId = currentUserService.getCompanyId();
@@ -149,7 +149,7 @@ public class DocumentService {
     }
 
     public DocumentResponse deleteDocumentById(Long id) {
-        if(!currentUserService.getRole().equals(Role.ADMIN)){
+        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
             throw new AppException("Only admin can see documents");
         }
         Long companyId = currentUserService.getCompanyId();

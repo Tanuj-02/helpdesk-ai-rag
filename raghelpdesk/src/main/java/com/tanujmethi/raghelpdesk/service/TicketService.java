@@ -103,7 +103,7 @@ public class TicketService {
                 .build();
         rabbitMqPublisher.publishChat(chatRequest);
 
-        if (ticket.getTicketPriority() == TicketPriority.URGENT) {
+        if (ticket.getTicketPriority() == TicketPriority.URGENT && agent != null) {
 
             UrgentEmailResponse email = UrgentEmailResponse.builder()
                     .agentEmail(agent.getEmail())
@@ -116,9 +116,7 @@ public class TicketService {
             rabbitMqPublisher.publishUrgentEmail(email);
         }
 
-        TicketResponse response = convertToResponse(ticket);
-
-        return response;
+        return convertToResponse(ticket);
     }
 
     public Page<TicketResponse> getMyTicket(Pageable pageable){
@@ -201,7 +199,7 @@ public class TicketService {
                 .orElseThrow(() -> new AppException("Ticket not found"));
 
         boolean isOwner = ticket.getUser().getId().equals(userId);
-        boolean isAdmin = currentUserService.getRole().equals(Role.ADMIN);
+        boolean isAdmin = currentUserService.getRole().equals(Role.ADMIN.toString());
         boolean isAssignedAgent = ticket.getAgent() != null
                 && ticket.getAgent().getId().equals(userId);
 

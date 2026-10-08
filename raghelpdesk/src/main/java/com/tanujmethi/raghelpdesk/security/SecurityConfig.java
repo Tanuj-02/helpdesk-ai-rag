@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-
+                        .requestMatchers("/ai-config").authenticated()
                         .requestMatchers("/invitation/send", "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

@@ -26,15 +26,10 @@ public class ChatService {
 
         Chat chat = chatRepository
                 .findByTicketId(request.getTicketId())
-                .orElseThrow(() ->
-                        new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new RuntimeException("Chat not found"));
 
-        if (!chat.getUserId().equals(userId)
-                && !chat.getAgentId().equals(userId)) {
-
-            throw new AccessDeniedException(
-                    "You are not part of this ticket"
-            );
+        if (!chat.getUserId().equals(userId) && !chat.getAgentId().equals(userId)) {
+            throw new AccessDeniedException("You are not part of this ticket");
         }
 
         ChatMessage message = ChatMessage.builder()
@@ -56,7 +51,15 @@ public class ChatService {
                 .build();
     }
 
-    public List<ChatResponseDto> getMessages(Long ticketId){
+    public List<ChatResponseDto> getMessages(Long ticketId, Long userId){
+        Chat chat = chatRepository
+                .findByTicketId(ticketId)
+                .orElseThrow(() -> new RuntimeException("Chat not found"));
+
+        if (!chat.getUserId().equals(userId) && !chat.getAgentId().equals(userId)) {
+            throw new AccessDeniedException("You are not part of this ticket");
+        }
+
         List<ChatMessage> messages = chatMessageRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
 
         return messages.stream()

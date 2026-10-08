@@ -3,6 +3,7 @@ package com.tanujmethi.raghelpdesk.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +17,7 @@ public class CompanyInvitation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
     private String email;
@@ -26,7 +27,7 @@ public class CompanyInvitation {
     private LocalDateTime createAt;
     private boolean used;
     private LocalDateTime expiresAt;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invited_by_id")
     private User invitedBy;
 }

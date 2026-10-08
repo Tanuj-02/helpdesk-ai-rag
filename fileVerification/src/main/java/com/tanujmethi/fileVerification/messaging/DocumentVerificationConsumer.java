@@ -8,6 +8,7 @@ import com.tanujmethi.fileVerification.service.S3FileStorageService;
 import com.tanujmethi.fileVerification.service.TextExtractionService;
 import com.tanujmethi.fileVerification.service.VerificationResultAggregator;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -24,6 +25,9 @@ public class DocumentVerificationConsumer {
     private final VerificationResultAggregator verificationResultAggregator;
     private final DocumentVerificationResultProducer documentVerificationResultProducer;
     private final DocumentVectorPublisher documentVectorPublisher;
+
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
 
     public DocumentVerificationConsumer(
             S3FileStorageService s3FileStorageService,
@@ -47,49 +51,28 @@ public class DocumentVerificationConsumer {
     public void consume(DocumentVerificationRequest request) {
 
         try {
-            try (var inputStream = s3FileStorageService.download(
-                    "ai-helpdesk-tanuj",
-                    request.getS3Key()
-            )) {
+            try (var inputStream = s3FileStorageService.download(bucketName, request.getS3Key())) {
 
-                String text = textExtractionService.extractText(
-                        inputStream,
-                        request.getS3Key()
-                );
+                String text = textExtractionService.extractText(inputStream, request.getS3Key());
 
-                List<DocumentChunk> chunks =
-                        documentChunkingService.chunkText(text);
+                List<DocumentChunk> chunks = documentChunkingService.chunkText(text);
 
                 if (chunks.isEmpty()) {
-                    throw new IllegalStateException(
-                            "No text could be extracted from document"
-                    );
+                    throw new IllegalStateException("No text could be extracted from document");
                 }
 
-                List<DocumentChunk> sampledChunks =
-                        documentSamplingService.sampleChunks(
-                                chunks,
-                                5
-                        );
+                List<DocumentChunk> sampledChunks = documentSamplingService.sampleChunks(chunks, 5);
 
-                List<DocumentVerificationResult> results =
-                        new ArrayList<>();
+                List<DocumentVerificationResult> results = new ArrayList<>();
 
                 for (DocumentChunk chunk : sampledChunks) {
 
-                    DocumentVerificationResult result =
-                            documentVerificationService.verify(
-                                    chunk.getContent(),
-                                    request.getDocumentType()
-                            );
+                    DocumentVerificationResult result = documentVerificationService.verify(chunk.getContent(), request.getDocumentType());
 
                     results.add(result);
                 }
 
-                DocumentVerificationResult finalResult =
-                        verificationResultAggregator.aggregate(
-                                results
-                        );
+                DocumentVerificationResult finalResult = verificationResultAggregator.aggregate(results);
 
                 boolean approved = finalResult.isAppropriate()
                         && finalResult.isRelevant()
@@ -123,18 +106,11 @@ public class DocumentVerificationConsumer {
 
         } catch (Exception e) {
 
-            System.err.println(
-                    "Failed to process document: "
-                            + request.getDocumentId()
-            );
+            System.err.println("Failed to process document: " + request.getDocumentId());
 
             e.printStackTrace();
 
-            throw new RuntimeException(
-                    "Failed to process document: "
-                            + request.getDocumentId(),
-                    e
-            );
+            throw new RuntimeException("Failed to process document: " + request.getDocumentId(), e);
         }
     }
 }

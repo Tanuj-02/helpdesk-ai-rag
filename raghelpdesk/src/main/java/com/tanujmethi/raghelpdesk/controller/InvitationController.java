@@ -1,5 +1,6 @@
 package com.tanujmethi.raghelpdesk.controller;
 
+import com.tanujmethi.raghelpdesk.dto.CompanyInvitationResponse;
 import com.tanujmethi.raghelpdesk.dto.InvitationDto;
 import com.tanujmethi.raghelpdesk.entity.CompanyInvitation;
 import com.tanujmethi.raghelpdesk.service.auth.InvitationService;
@@ -18,7 +19,7 @@ public class InvitationController {
     }
 
     @PostMapping("/send")
-    public CompanyInvitation sendInvitation(@RequestBody InvitationDto invitationdto){
+    public CompanyInvitationResponse sendInvitation(@RequestBody InvitationDto invitationdto){
         return invitationService.sendInvitation(invitationdto);
     }
 }
