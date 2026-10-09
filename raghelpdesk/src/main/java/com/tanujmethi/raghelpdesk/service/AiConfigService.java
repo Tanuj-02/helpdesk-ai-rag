@@ -13,10 +13,12 @@ import java.time.LocalDateTime;
 public class AiConfigService {
     private final CompanyRepository companyRepository;
     private final CurrentUserService currentUserService;
+    private final ChatClientManager chatClientManager;
 
-    public AiConfigService(CompanyRepository companyRepository, CurrentUserService currentUserService) {
+    public AiConfigService(CompanyRepository companyRepository, CurrentUserService currentUserService, ChatClientManager chatClientManager) {
         this.companyRepository = companyRepository;
         this.currentUserService = currentUserService;
+        this.chatClientManager = chatClientManager;
     }
 
     public AiConfigResponse getConfig(){
@@ -46,7 +48,7 @@ public class AiConfigService {
         company.setApiUpdatedAt(LocalDateTime.now());
 
         companyRepository.save(company);
-
+        chatClientManager.invalidate(company.getId());
         return AiConfigResponse.builder()
                 .configured(true)
                 .apiKey(maskKey(apiKeyRequest.getApiKey()))
@@ -61,6 +63,7 @@ public class AiConfigService {
         company.setApiUpdatedAt(null);
 
         companyRepository.save(company);
+        chatClientManager.invalidate(company.getId());
     }
 
     private String maskKey(String apiKey) {

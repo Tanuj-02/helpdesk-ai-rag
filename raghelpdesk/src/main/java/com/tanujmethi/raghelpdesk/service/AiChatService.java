@@ -1,6 +1,7 @@
 package com.tanujmethi.raghelpdesk.service;
 
 import com.google.genai.Client;
+import com.tanujmethi.raghelpdesk.config.AsyncConfig;
 import com.tanujmethi.raghelpdesk.entity.Company;
 import com.tanujmethi.raghelpdesk.entity.Conversation;
 import com.tanujmethi.raghelpdesk.enums.MessageRole;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 public class AiChatService {
@@ -34,14 +36,18 @@ public class AiChatService {
     private final ConversationService conversationService;
     private final CompanyRepository companyRepository;
     private final ChatMemory chatMemory;
+    private final ChatClientManager chatClientManager;
+    private final Executor titleExecutor;
 
-    public AiChatService(VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService, CompanyRepository companyRepository, ChatMemory chatMemory) {
+    public AiChatService(VectorStore vectorStore, CurrentUserService currentUserService, TicketTool ticketTool, ConversationService conversationService, CompanyRepository companyRepository, ChatMemory chatMemory, ChatClientManager chatClientManager, Executor titleExecutor) {
         this.vectorStore = vectorStore;
         this.currentUserService = currentUserService;
         this.ticketTool = ticketTool;
         this.conversationService = conversationService;
         this.companyRepository = companyRepository;
         this.chatMemory = chatMemory;
+        this.chatClientManager = chatClientManager;
+        this.titleExecutor = titleExecutor;
     }
 
     public Flux<String> chat(String query, Long chatId, String model) {
@@ -70,7 +76,7 @@ public class AiChatService {
         }
 
         String apiKey = company.getApiKey();
-        ChatClient chatClient = createChatClient(apiKey);
+        ChatClient chatClient = chatClientManager.getOrCreate(companyId,apiKey,chatMemory);
 
         conversationService.saveMessage(
                 chatId,
@@ -80,17 +86,10 @@ public class AiChatService {
         );
 
         if (conversation.getTitle() == null) {
-
             CompletableFuture.runAsync(() -> {
-
                 String title = generateTitle(query, chatClient);
-
-                conversationService.updateTitle(
-                        chatId,
-                        title,
-                        userId
-                );
-            });
+                conversationService.updateTitle(chatId, title, userId);
+            }, titleExecutor);
         }
 
         QuestionAnswerAdvisor questionAnswerAdvisor =
@@ -137,26 +136,6 @@ public class AiChatService {
                                 aiResponse.toString()
                         )
                 );
-    }
-
-    private ChatClient createChatClient(String apiKey) {
-
-        Client genAiClient = Client.builder()
-                .apiKey(apiKey)
-                .build();
-
-        GoogleGenAiChatModel chatModel =
-                GoogleGenAiChatModel.builder()
-                        .genAiClient(genAiClient)
-                        .build();
-
-        return ChatClient.builder(chatModel)
-                .defaultAdvisors(
-                        MessageChatMemoryAdvisor
-                                .builder(chatMemory)
-                                .build()
-                )
-                .build();
     }
 
     private String generateTitle(String query, ChatClient chatClient) {
