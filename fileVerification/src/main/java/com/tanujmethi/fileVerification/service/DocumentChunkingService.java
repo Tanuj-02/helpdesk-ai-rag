@@ -14,9 +14,8 @@ public class DocumentChunkingService {
 
     public List<DocumentChunk> chunkText(String text) {
 
-        if (text == null || text.isBlank()) {
-            return List.of();
-        }
+        if (text == null || text.isBlank()) return List.of();
+
 
         List<DocumentChunk> chunks = new ArrayList<>();
 

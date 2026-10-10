@@ -1,6 +1,7 @@
 package com.tanujmethi.ticketChatService.config;
 
 import com.tanujmethi.ticketChatService.dto.ChatUserDetails;
+import com.tanujmethi.ticketChatService.exception.InvalidWebSocketTokenException;
 import com.tanujmethi.ticketChatService.security.JwtService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -26,30 +27,21 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(
-                        message,
-                        StompHeaderAccessor.class
-                );
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null &&
-                StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
 
             String authHeader = accessor.getFirstNativeHeader("Authorization");
 
-            if (authHeader == null ||
-                    !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 
-                throw new IllegalArgumentException(
-                        "Missing Authorization header"
-                );
+                throw new IllegalArgumentException("Missing Authorization header");
             }
 
             String token = authHeader.substring(7);
 
             if (!jwtService.isTokenValid(token)) {
-                throw new IllegalArgumentException(
-                        "Invalid JWT"
-                );
+                throw new InvalidWebSocketTokenException("Invalid JWT token");
             }
 
             Long userId = jwtService.extractUserId(token);
@@ -57,23 +49,12 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             String email = jwtService.extractEmail(token);
             String role = jwtService.extractRole(token);
 
-            ChatUserDetails user = new ChatUserDetails(
-                            userId,
-                            companyId,
-                            email,
-                            role
-                    );
+            ChatUserDetails user = new ChatUserDetails(userId, companyId, email, role);
 
-            accessor.setUser(
-                    new UsernamePasswordAuthenticationToken(
+            accessor.setUser(new UsernamePasswordAuthenticationToken(
                             user,
                             null,
-                            List.of(
-                                    new SimpleGrantedAuthority(
-                                            "ROLE_" + role
-                                    )
-                            )
-                    )
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role)))
             );
         }
 

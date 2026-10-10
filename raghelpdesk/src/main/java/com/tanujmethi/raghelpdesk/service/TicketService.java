@@ -11,7 +11,8 @@ import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.enums.TicketPriority;
 import com.tanujmethi.raghelpdesk.enums.TicketStatus;
-import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.exception.ForbiddenException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.messaging.RabbitMqPublisher;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.TicketRepository;
@@ -71,11 +72,11 @@ public class TicketService {
     public TicketResponse createTicket(CreateTicketRequest createTicketRequest, Long userId, Long companyId) {
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new AppException("User not found")
+                () -> new ResourceNotFoundException("User with " + userId + " not found")
         );
 
         Company company = companyRepository.findById(companyId).orElseThrow(
-                () -> new AppException("Company not found")
+                () -> new ResourceNotFoundException("Company with " + companyId + " not found")
         );
 
         User agent = agentAssignmentService.leastBusyAgent(companyId);
@@ -130,9 +131,10 @@ public class TicketService {
         Long companyId = currentUserService.getCompanyId();
         String role = currentUserService.getRole();
 
-        if(!role.equals(Role.ADMIN.toString())){
-            throw new AppException("Only admins can view all company tickets");
+        if (!Role.ADMIN.name().equals(role)) {
+            throw new ForbiddenException("Only admins can view company tickets");
         }
+
 
         return ticketRepository.findByCompanyId(companyId, pageable)
                 .map(this :: convertToResponse);
@@ -142,9 +144,10 @@ public class TicketService {
         Long agentId = currentUserService.getUserId();
         String role = currentUserService.getRole();
 
-        if (!role.equals(Role.AGENT.toString())) {
-            throw new AppException("Only agents can view assigned tickets");
+        if (!Role.AGENT.name().equals(role)) {
+            throw new ForbiddenException("Only agents can view company tickets");
         }
+
 
         return ticketRepository.findByAgentId(agentId, pageable)
                 .map(this::convertToResponse);
@@ -153,23 +156,23 @@ public class TicketService {
     public TicketResponse updateTicket(Long ticketId, UpdateTicketRequest updateTicketRequest, Long userId, Long companyId, String role) {
 
         Ticket ticket = ticketRepository.findByIdAndCompanyId(ticketId, companyId)
-                .orElseThrow(() -> new AppException("Ticket not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket with " + ticketId + " not found"));
 
-        if (role.equals(Role.EMPLOYEE.toString())) {
+        if (Role.EMPLOYEE.name().equals(role)) {
 
             if (!ticket.getUser().getId().equals(userId)) {
-                throw new AppException("You can only update your own tickets");
+                throw new ForbiddenException("You can only update your own tickets");
             }
 
-        } else if (role.equals(Role.AGENT.toString())) {
+        } else if (Role.AGENT.name().equals(role)) {
 
             if (!ticket.getAgent().getId().equals(userId)) {
-                throw new AppException("You can only update tickets assigned to you");
+                throw new ForbiddenException("You can only update tickets assigned to you");
             }
 
-        } else if (!role.equals(Role.ADMIN.toString())) {
+        } else if (!Role.ADMIN.name().equals(role)) {
 
-            throw new AppException("Invalid role");
+            throw new ForbiddenException("Admins can't update ticket");
         }
 
         if (updateTicketRequest.getTicketStatus() != null) {
@@ -196,7 +199,7 @@ public class TicketService {
 
         Ticket ticket = ticketRepository
                 .findByIdAndCompanyId(ticketId, companyId)
-                .orElseThrow(() -> new AppException("Ticket not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket with " + ticketId + " not found"));
 
         boolean isOwner = ticket.getUser().getId().equals(userId);
         boolean isAdmin = currentUserService.getRole().equals(Role.ADMIN.toString());
@@ -204,7 +207,7 @@ public class TicketService {
                 && ticket.getAgent().getId().equals(userId);
 
         if (!isOwner && !isAdmin && !isAssignedAgent) {
-            throw new AppException("You are not authorized to view this ticket");
+            throw new ForbiddenException("You are not authorized to view this ticket");
         }
 
         return convertToResponse(ticket);

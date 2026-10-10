@@ -7,6 +7,9 @@ import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.enums.Status;
 import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.exception.DuplicateResourceException;
+import com.tanujmethi.raghelpdesk.exception.InvalidTokenException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyInvitationRepository;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
@@ -15,7 +18,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +44,11 @@ public class AuthService {
     @Transactional
     public void registerCompany(RegisterRequest registerRequest) {
         if(companyRepository.existsByEmail(registerRequest.getCompanyEmail())){
-            throw new AppException("Company Already Existss");
+            throw new DuplicateResourceException("Company Already Exists");
         }
 
         if(userRepository.existsByEmail(registerRequest.getAdminEmail())){
-            throw new AppException("Admin user already exists");
+            throw new DuplicateResourceException("Admin with " + registerRequest.getAdminEmail() + " already exists");
         }
 
         Company company = Company.builder()
@@ -72,7 +74,7 @@ public class AuthService {
         authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()-> new AppException("User Not found"));
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()-> new ResourceNotFoundException("User Not found"));
 
         if(user.getStatus() != Status.ACTIVE){
             throw new AppException("Your account is " + user.getStatus().name() + ", Please contact your admin ");
@@ -95,25 +97,25 @@ public class AuthService {
         String token = employeeRegistration.getToken();
 
         CompanyInvitation invitation = companyInvitationRepository.findByToken(token).orElseThrow(
-                () -> new AppException("Invitation not found")
+                () -> new ResourceNotFoundException("Invitation not found")
         );
 
         if(invitation.isUsed()){
-            throw new AppException("Invitation has already been used");
+            throw new DuplicateResourceException("Invitation has already been used");
         }
 
         if(!jwtService.isInvitationToken(token)){
-            throw new AppException("Invalid or expired invitation");
+            throw new InvalidTokenException("Invalid or expired invitation");
         }
 
         String email = jwtService.extractEmail(token);
         if(userRepository.existsByEmail(email)){
-            throw new AppException("User already exists");
+            throw new DuplicateResourceException("User already exists");
         }
 
         Long companyId = jwtService.extractCompanyId(token);
         Company company = companyRepository.findById(companyId).orElseThrow(
-                () -> new AppException("Company not found")
+                () -> new ResourceNotFoundException("Company not found")
         );
 
         User user = User.builder()
@@ -144,7 +146,7 @@ public class AuthService {
         CurrentUser currentUser = (CurrentUser) authentication.getPrincipal();
 
         User user = userRepository.findByEmail(currentUser.email()).orElseThrow(
-                () -> new AppException("User not found")
+                () -> new ResourceNotFoundException("User not found")
         );
 
         return CurrentUserResponse.builder()

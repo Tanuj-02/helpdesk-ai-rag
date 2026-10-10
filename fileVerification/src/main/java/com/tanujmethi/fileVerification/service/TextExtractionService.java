@@ -1,5 +1,6 @@
 package com.tanujmethi.fileVerification.service;
 
+import com.tanujmethi.fileVerification.exception.TextExtractionException;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,7 @@ public class TextExtractionService {
         try {
             return tika.parseToString(inputStream);
         } catch (TikaException e) {
-            throw new IOException(
-                    "Failed to extract text from file: " + fileName,
-                    e
-            );
+            throw new TextExtractionException("Failed to extract text from file: " + fileName);
         }
     }
 }

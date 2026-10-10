@@ -8,6 +8,7 @@ import com.tanujmethi.raghelpdesk.entity.Message;
 import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.MessageRole;
 import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.ConversationRepository;
 import com.tanujmethi.raghelpdesk.repository.MessageRepository;
@@ -40,11 +41,11 @@ public class ConversationService {
         Long companyId = currentUserService.getCompanyId();
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new AppException("User not found")
+                () -> new ResourceNotFoundException("User with " + userId + " not found")
         );
 
         Company company = companyRepository.findById(companyId).orElseThrow(
-                () -> new AppException("Company not found")
+                () -> new ResourceNotFoundException("Company with " + companyId + " not found")
         );
 
         Conversation conversation = Conversation.builder()
@@ -63,7 +64,7 @@ public class ConversationService {
 
     public void saveMessage(Long conversationId, Long userId, MessageRole role, String content){
         Conversation conversation = conversationRepository.findByIdAndUserId(conversationId, userId).orElseThrow(
-                () -> new AppException("Conversation not found")
+                () -> new ResourceNotFoundException("Conversation with " + conversationId + " not found")
         );
 
         Message message = Message.builder()
@@ -79,7 +80,7 @@ public class ConversationService {
         Conversation conversation = conversationRepository
                 .findByIdAndUserId(conversationId,userId)
                 .orElseThrow(() ->
-                        new AppException("Conversation not found"));
+                        new ResourceNotFoundException("Conversation with " + conversationId + " not found"));
 
         conversation.setTitle(title);
 
@@ -93,15 +94,12 @@ public class ConversationService {
         );
     }
 
-    public Page<MessageResponse> getMessages(
-            Long conversationId,
-            Pageable pageable
-    ) {
+    public Page<MessageResponse> getMessages(Long conversationId, Pageable pageable) {
 
         Long userId = currentUserService.getUserId();
 
         conversationRepository.findByIdAndUserId(conversationId,userId)
-                .orElseThrow(() -> new AppException("Conversation not found")
+                .orElseThrow(() -> new ResourceNotFoundException("Conversation with " + conversationId + " not found")
         );
 
         return messageRepository
@@ -138,8 +136,7 @@ public class ConversationService {
         Conversation conversation =
                 conversationRepository
                         .findByIdAndUserId(conversationId, userId)
-                        .orElseThrow(() ->
-                                new RuntimeException("Conversation not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Conversation with " + conversationId + " not found"));
 
         conversation.setModel(model);
         conversationRepository.save(conversation);

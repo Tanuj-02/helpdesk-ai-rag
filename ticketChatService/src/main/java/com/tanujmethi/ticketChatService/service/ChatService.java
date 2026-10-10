@@ -4,6 +4,8 @@ import com.tanujmethi.ticketChatService.dto.ChatMessageDto;
 import com.tanujmethi.ticketChatService.dto.ChatResponseDto;
 import com.tanujmethi.ticketChatService.entity.Chat;
 import com.tanujmethi.ticketChatService.entity.ChatMessage;
+import com.tanujmethi.ticketChatService.exception.ChatNotFoundException;
+import com.tanujmethi.ticketChatService.exception.UnauthorizedChatAccessException;
 import com.tanujmethi.ticketChatService.repository.ChatMessageRepository;
 import com.tanujmethi.ticketChatService.repository.ChatRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -26,10 +28,10 @@ public class ChatService {
 
         Chat chat = chatRepository
                 .findByTicketId(request.getTicketId())
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new ChatNotFoundException("Chat with " + request.getTicketId() + " not found"));
 
         if (!chat.getUserId().equals(userId) && !chat.getAgentId().equals(userId)) {
-            throw new AccessDeniedException("You are not part of this ticket");
+            throw new UnauthorizedChatAccessException("You are not part of this ticket");
         }
 
         ChatMessage message = ChatMessage.builder()
@@ -54,10 +56,10 @@ public class ChatService {
     public List<ChatResponseDto> getMessages(Long ticketId, Long userId){
         Chat chat = chatRepository
                 .findByTicketId(ticketId)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new ChatNotFoundException("Chat with " + ticketId + " not found"));
 
         if (!chat.getUserId().equals(userId) && !chat.getAgentId().equals(userId)) {
-            throw new AccessDeniedException("You are not part of this ticket");
+            throw new UnauthorizedChatAccessException("You are not part of this ticket");
         }
 
         List<ChatMessage> messages = chatMessageRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);

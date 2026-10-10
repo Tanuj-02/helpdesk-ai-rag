@@ -3,7 +3,6 @@ package com.tanujmethi.raghelpdesk.controller;
 import com.tanujmethi.raghelpdesk.dto.ApiKeyRequest;
 import com.tanujmethi.raghelpdesk.dto.AiConfigResponse;
 import com.tanujmethi.raghelpdesk.service.AiConfigService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -2,7 +2,6 @@ package com.tanujmethi.raghelpdesk.controller;
 
 import com.tanujmethi.raghelpdesk.dto.ConversationResponse;
 import com.tanujmethi.raghelpdesk.dto.MessageResponse;
-import com.tanujmethi.raghelpdesk.entity.Conversation;
 import com.tanujmethi.raghelpdesk.service.ConversationService;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import org.springframework.data.domain.Page;

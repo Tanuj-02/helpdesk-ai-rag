@@ -3,6 +3,7 @@ package com.tanujmethi.raghelpdesk.service;
 import com.tanujmethi.raghelpdesk.dto.AiConfigResponse;
 import com.tanujmethi.raghelpdesk.dto.ApiKeyRequest;
 import com.tanujmethi.raghelpdesk.entity.Company;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class AiConfigService {
     }
 
     public AiConfigResponse getConfig(){
-        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow();
+        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow(() -> new ResourceNotFoundException("Company with " + currentUserService.getCompanyId() + " not found"));
 
         String apiKey = company.getApiKey();
 
@@ -42,7 +43,7 @@ public class AiConfigService {
     }
 
     public AiConfigResponse updateConfig(ApiKeyRequest apiKeyRequest){
-        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow();
+        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow(() -> new ResourceNotFoundException("Company with " + currentUserService.getCompanyId() + " not found"));
 
         company.setApiKey(apiKeyRequest.getApiKey());
         company.setApiUpdatedAt(LocalDateTime.now());
@@ -57,7 +58,9 @@ public class AiConfigService {
     }
 
     public void deleteConfig(){
-        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow();
+        Company company = companyRepository.findById(currentUserService.getCompanyId()).orElseThrow(
+                () -> new ResourceNotFoundException("Company with " + currentUserService.getCompanyId() + " not found")
+        );
 
         company.setApiKey(null);
         company.setApiUpdatedAt(null);
@@ -67,9 +70,7 @@ public class AiConfigService {
     }
 
     private String maskKey(String apiKey) {
-        if(apiKey.length() <= 8){
-            return "••••••••";
-        }
+        if(apiKey.length() <= 8) return "••••••••";
 
         return apiKey.substring(0,4) + "••••••••" + apiKey.substring(apiKey.length()-4);
     }

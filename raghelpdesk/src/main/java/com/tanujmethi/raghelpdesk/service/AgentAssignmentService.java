@@ -19,18 +19,12 @@ public class AgentAssignmentService {
     }
 
     public User leastBusyAgent(Long companyId){
-        List<TicketStatus> activeStatuses = List.of(
-                TicketStatus.OPEN,
-                TicketStatus.IN_PROGRESS
-        );
+        List<TicketStatus> activeStatuses = List.of(TicketStatus.OPEN, TicketStatus.IN_PROGRESS);
 
-        return userRepository.findLeastBusyAgent(
-                        companyId,
-                        Role.AGENT,
-                        activeStatuses,
+        return userRepository.findLeastBusyAgent(companyId, Role.AGENT, activeStatuses,
                         PageRequest.of(0, 1)
                 ).stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No available agent"));
+                .orElse(null);
     }
 }

@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface CompanyInvitationRepository extends JpaRepository<CompanyInvitation, Long> {
     Optional<CompanyInvitation> findByToken(String token);
+
+    boolean existsByEmailIgnoreCaseAndCompany_Id(String email, Long companyId);
 }

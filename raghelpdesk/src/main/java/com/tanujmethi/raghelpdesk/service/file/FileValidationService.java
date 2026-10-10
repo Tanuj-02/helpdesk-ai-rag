@@ -25,19 +25,14 @@ public class FileValidationService {
         }
 
         if (file.getSize() > maxFileSize) {
-            throw new IllegalArgumentException(
-                    "File size must not exceed 100 MB"
-            );
+            throw new IllegalArgumentException("File size must not exceed 100 MB");
         }
 
         String contentType = file.getContentType();
 
-        if (contentType == null ||
-                !allowedFileTypes.contains(contentType)) {
+        if (contentType == null || !allowedFileTypes.contains(contentType)) {
 
-            throw new IllegalArgumentException(
-                    "Unsupported file type: " + contentType
-            );
+            throw new IllegalArgumentException("Unsupported file type: " + contentType);
         }
     }
 }

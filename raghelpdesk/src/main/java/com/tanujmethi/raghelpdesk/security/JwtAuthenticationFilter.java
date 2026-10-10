@@ -77,8 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String email = jwtService.extractEmail(token);
 
-            if (email != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 if (jwtService.isTokenValid(token)) {
 
@@ -108,8 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext()
                             .setAuthentication(authenticationToken);
 
-                    System.out.println("AUTHENTICATED: " +
-                            currentUser.email());
+                    System.out.println("AUTHENTICATED: " + currentUser.email());
                 }
             }
 

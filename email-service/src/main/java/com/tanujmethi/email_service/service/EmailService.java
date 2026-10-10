@@ -3,6 +3,8 @@ package com.tanujmethi.email_service.service;
 import com.tanujmethi.email_service.dto.EmailRequest;
 import com.tanujmethi.email_service.dto.UrgentEmailRequest;
 import com.tanujmethi.email_service.enums.TicketPriority;
+import com.tanujmethi.email_service.exception.EmailSendingException;
+import com.tanujmethi.email_service.exception.InvalidEmailRecipientException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,8 +52,7 @@ public class EmailService {
         TicketPriority priority = urgentEmailRequest.getTicketPriority();
         String priorityLabel = priority != null ? priority.name() : "URGENT";
         String priorityColor = priorityColor(priority);
-        String subject = "URGENT: " + safe(urgentEmailRequest.getSubject(), "Ticket needs attention")
-                + " (" + priorityLabel + ")";
+        String subject = "URGENT: " + safe(urgentEmailRequest.getSubject(), "Ticket needs attention") + " (" + priorityLabel + ")";
 
         String body = URGENT_TEMPLATE
                 .replace("{{subject}}", HtmlUtils.htmlEscape(safe(urgentEmailRequest.getSubject(), "Untitled ticket")))
@@ -69,7 +70,7 @@ public class EmailService {
 
     private void sendHtml(String to, String subject, String html) {
         if (to == null || to.isBlank()) {
-            throw new IllegalArgumentException("Recipient email is required");
+            throw new InvalidEmailRecipientException("Recipient email is required");
         }
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -84,7 +85,7 @@ public class EmailService {
 
             javaMailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new IllegalStateException("Failed to send email to " + to, e);
+            throw new EmailSendingException("Failed to send email to " + to);
         }
     }
 

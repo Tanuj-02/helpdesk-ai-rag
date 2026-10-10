@@ -8,6 +8,8 @@ import com.tanujmethi.raghelpdesk.entity.CompanyDocument;
 import com.tanujmethi.raghelpdesk.enums.DocumentStatus;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.exception.ForbiddenException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyDocumentRepository;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.S3StorageService;
@@ -18,7 +20,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.Document;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -50,13 +51,13 @@ public class DocumentService {
 
 
         if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
-            throw new AppException("Only Admin can see all users");
+            throw new ForbiddenException("Only admins can upload file");
         }
 
         Long companyId = currentUserService.getCompanyId();
 
         Company company = companyRepository.findById(companyId).orElseThrow(
-                () -> new AppException("Company not found")
+                () -> new ResourceNotFoundException("Company with " + currentUserService.getCompanyId() + " not found")
         );
 
         fileValidationService.validate(file);
@@ -106,8 +107,8 @@ public class DocumentService {
     public List<DocumentResponse> getAllDocuments() {
         Long companyId = currentUserService.getCompanyId();
 
-        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
-            throw new AppException("Ony admin can see documents");
+        if(!Role.ADMIN.name().equals(currentUserService.getRole())){
+            throw new ForbiddenException("Ony admin can see documents");
         }
 
         List<CompanyDocument> documents = companyDocumentRepository.findByCompanyId(companyId);
@@ -128,8 +129,8 @@ public class DocumentService {
     }
 
     public DocumentResponse getDocumentById(Long id) {
-        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
-            throw new AppException("Only admin can see documents");
+        if(!Role.ADMIN.name().equals(currentUserService.getRole())){
+            throw new ForbiddenException("Only admin can see documents");
         }
         Long companyId = currentUserService.getCompanyId();
 
@@ -149,8 +150,8 @@ public class DocumentService {
     }
 
     public DocumentResponse deleteDocumentById(Long id) {
-        if(!currentUserService.getRole().equals(Role.ADMIN.toString())){
-            throw new AppException("Only admin can see documents");
+        if(!Role.ADMIN.name().equals(currentUserService.getRole())){
+            throw new ForbiddenException("Only admin can delete documents");
         }
         Long companyId = currentUserService.getCompanyId();
 

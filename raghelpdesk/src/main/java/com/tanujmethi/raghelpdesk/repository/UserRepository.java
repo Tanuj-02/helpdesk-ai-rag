@@ -43,4 +43,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("statuses") List<TicketStatus> statuses,
             Pageable pageable
     );
+
+    boolean existsByEmailIgnoreCase(String email);
 }

@@ -40,15 +40,13 @@ public class DocumentController {
     public ResponseEntity<DocumentResponse> uploadDocument(
             @RequestPart("file") MultipartFile file,
             @RequestParam("title") String title,
-            @RequestParam("category") DocumentCategory category
-    ) throws IOException {
+            @RequestParam("category") DocumentCategory category) throws IOException {
 
         DocumentUploadRequest request = new DocumentUploadRequest();
         request.setTitle(title);
         request.setCategory(category);
 
-        DocumentResponse document =
-                documentService.uploadDocument(file, request);
+        DocumentResponse document = documentService.uploadDocument(file, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

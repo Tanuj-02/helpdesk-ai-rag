@@ -1,20 +1,17 @@
 package com.tanujmethi.raghelpdesk.service.admin;
 
-import com.tanujmethi.raghelpdesk.dto.CurrentUser;
-import com.tanujmethi.raghelpdesk.dto.CurrentUserResponse;
 import com.tanujmethi.raghelpdesk.dto.UserResponse;
 import com.tanujmethi.raghelpdesk.entity.User;
 import com.tanujmethi.raghelpdesk.enums.Role;
 import com.tanujmethi.raghelpdesk.enums.Status;
-import com.tanujmethi.raghelpdesk.exception.AppException;
+import com.tanujmethi.raghelpdesk.exception.ForbiddenException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +33,7 @@ public class AdminService {
     public Page<UserResponse> getAllUsers(Pageable pageable) {
 
         if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
-            throw new AppException("Only Admin can see all users");
+            throw new ForbiddenException("Only Admin can see all users");
         }
 
         Long companyId = currentUserService.getCompanyId();
@@ -54,13 +51,13 @@ public class AdminService {
 
     public UserResponse getByUserId(Long id) {
         if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
-            throw new AppException("Only Admin can see all users");
+            throw new ForbiddenException("Only Admin can see all users");
         }
 
         Long companyId= currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyId(id, companyId).orElseThrow(
-                () -> new AppException("User with id " + id + " and company id " + companyId + " not found" )
+                () -> new ResourceNotFoundException("User with id " + id + " and company id " + companyId + " not found" )
         );
 
         return UserResponse.builder()
@@ -75,13 +72,13 @@ public class AdminService {
     public UserResponse updateStatus(Long id, Status status){
 
         if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
-            throw new AppException("Only Admin can see all users");
+            throw new ForbiddenException("Only Admin can see all users");
         }
 
         Long companyId = currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyIdAndRoleIn(id, companyId, List.of(Role.EMPLOYEE, Role.AGENT)).orElseThrow(
-                () -> new AppException("User with id " + id + " and company id " + companyId + " not found" )
+                () -> new ResourceNotFoundException("User with id " + id + " and company id " + companyId + " not found" )
         );
 
         user.setStatus(status);
@@ -99,13 +96,13 @@ public class AdminService {
     public UserResponse updateRole(Long id, Role role) {
 
         if (!Role.ADMIN.name().equals(currentUserService.getRole())) {
-            throw new AppException("Only Admin can see all users");
+            throw new ForbiddenException("Only Admin can see all users");
         }
 
         Long companyId = currentUserService.getCompanyId();
 
         User user = userRepository.findByIdAndCompanyId(id, companyId).orElseThrow(
-                () -> new AppException("User not found")
+                () -> new ResourceNotFoundException("User not found")
         );
 
         user.setRole(role);

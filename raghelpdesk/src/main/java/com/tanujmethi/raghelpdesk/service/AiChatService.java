@@ -1,18 +1,16 @@
 package com.tanujmethi.raghelpdesk.service;
 
-import com.google.genai.Client;
-import com.tanujmethi.raghelpdesk.config.AsyncConfig;
 import com.tanujmethi.raghelpdesk.entity.Company;
 import com.tanujmethi.raghelpdesk.entity.Conversation;
 import com.tanujmethi.raghelpdesk.enums.MessageRole;
+import com.tanujmethi.raghelpdesk.exception.BadRequestException;
+import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import com.tanujmethi.raghelpdesk.tools.TicketTool;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -55,8 +53,7 @@ public class AiChatService {
         Long companyId = currentUserService.getCompanyId();
         Long userId = currentUserService.getUserId();
 
-        Conversation conversation =
-                conversationService.getConversation(chatId);
+        Conversation conversation = conversationService.getConversation(chatId);
 
         String selectedModel = model;
 
@@ -69,10 +66,10 @@ public class AiChatService {
         }
 
         Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Company with " + currentUserService.getCompanyId() + " not found"));
 
         if (company.getApiKey() == null || company.getApiKey().isBlank()) {
-            throw new RuntimeException("AI API key is not configured");
+            throw new BadRequestException("AI API key is not configured for this company. Please configure it in AI Settings.");
         }
 
         String apiKey = company.getApiKey();

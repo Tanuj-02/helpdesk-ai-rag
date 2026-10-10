@@ -1,7 +1,6 @@
 package com.tanujmethi.raghelpdesk.controller;
 
 import com.tanujmethi.raghelpdesk.dto.CreateTicketRequest;
-import com.tanujmethi.raghelpdesk.dto.CurrentUserResponse;
 import com.tanujmethi.raghelpdesk.dto.TicketResponse;
 import com.tanujmethi.raghelpdesk.dto.UpdateTicketRequest;
 import com.tanujmethi.raghelpdesk.service.TicketService;

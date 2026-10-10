@@ -1,6 +1,7 @@
 package com.tanujmethi.fileVerification.service;
 
 import com.tanujmethi.fileVerification.dto.DocumentVerificationResult;
+import com.tanujmethi.fileVerification.exception.DocumentVerificationFailedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class VerificationResultAggregator {
     public DocumentVerificationResult aggregate(List<DocumentVerificationResult> results) {
 
         if (results == null || results.isEmpty()) {
-            throw new IllegalArgumentException("No verification results available");
+            throw new DocumentVerificationFailedException("No verification results available");
         }
 
         long relevantCount = results.stream()
@@ -28,9 +29,7 @@ public class VerificationResultAggregator {
                 .count();
 
         double averageConfidence = results.stream()
-                        .mapToDouble(
-                                DocumentVerificationResult::getConfidence
-                        )
+                        .mapToDouble(DocumentVerificationResult::getConfidence)
                         .average()
                         .orElse(0.0);
 
