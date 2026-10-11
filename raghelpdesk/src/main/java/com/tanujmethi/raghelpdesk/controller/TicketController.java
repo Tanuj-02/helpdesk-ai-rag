@@ -49,9 +49,7 @@ public class TicketController {
     }
 
     @PutMapping("/{ticketId}")
-    public ResponseEntity<TicketResponse> updateTicket(
-            @PathVariable Long ticketId,
-            @RequestBody UpdateTicketRequest updateTicketRequest) {
+    public ResponseEntity<TicketResponse> updateTicket(@PathVariable Long ticketId, @RequestBody UpdateTicketRequest updateTicketRequest) {
         Long userId = currentUserService.getUserId();
         Long companyId = currentUserService.getCompanyId();
         String role = currentUserService.getRole();

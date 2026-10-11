@@ -2,6 +2,8 @@ package com.tanujmethi.raghelpdesk.controller;
 
 import com.tanujmethi.raghelpdesk.dto.*;
 import com.tanujmethi.raghelpdesk.service.auth.AuthService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,22 +17,23 @@ public class AuthController {
     }
 
     @PostMapping("/register-company")
-    public void registerCompany(@RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<Void> registerCompany(@RequestBody RegisterRequest registerRequest){
         authService.registerCompany(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest loginRequest){
-        return authService.login(loginRequest);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/register")
-    public LoginResponse register(@RequestBody EmployeeRegistration employeeRegistration){
-        return authService.register(employeeRegistration);
+    public ResponseEntity<LoginResponse> register(@RequestBody EmployeeRegistration employeeRegistration){
+        return ResponseEntity.ok(authService.register(employeeRegistration));
     }
 
     @GetMapping("/me")
-    public CurrentUserResponse getCurrentUser(Authentication authentication){
-        return authService.getCurrentUser(authentication);
+    public ResponseEntity<CurrentUserResponse> getCurrentUser(Authentication authentication){
+        return ResponseEntity.ok(authService.getCurrentUser(authentication));
     }
 }

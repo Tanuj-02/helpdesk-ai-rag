@@ -3,6 +3,8 @@ package com.tanujmethi.raghelpdesk.controller;
 import com.tanujmethi.raghelpdesk.dto.CompanyInvitationResponse;
 import com.tanujmethi.raghelpdesk.dto.InvitationDto;
 import com.tanujmethi.raghelpdesk.service.auth.InvitationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,12 +20,13 @@ public class InvitationController {
     }
 
     @PostMapping("/send")
-    public CompanyInvitationResponse sendInvitation(@RequestBody InvitationDto invitationdto){
-        return invitationService.sendInvitation(invitationdto);
+    public ResponseEntity<CompanyInvitationResponse> sendInvitation(@RequestBody InvitationDto invitationdto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(invitationService.sendInvitation(invitationdto));
     }
 
     @PostMapping("/csv")
-    public void sendBulkInvitation(@RequestParam MultipartFile file) throws IOException {
+    public ResponseEntity<Void> sendBulkInvitation(@RequestParam MultipartFile file) throws IOException {
         invitationService.sendBulkInvitation(file);
+        return ResponseEntity.ok().build();
     }
 }

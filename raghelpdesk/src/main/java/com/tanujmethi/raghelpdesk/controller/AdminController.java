@@ -8,9 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -22,22 +21,22 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public Page<UserResponse> getAllUser(@PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return adminService.getAllUsers(pageable);
+    public ResponseEntity<Page<UserResponse>> getAllUser(@PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable){
+        return ResponseEntity.ok(adminService.getAllUsers(pageable));
     }
 
     @GetMapping("/user/{id}")
-    public UserResponse getByUserId(@PathVariable Long id){
-        return adminService.getByUserId(id);
+    public ResponseEntity<UserResponse> getByUserId(@PathVariable Long id){
+            return ResponseEntity.ok(adminService.getByUserId(id));
     }
 
     @PatchMapping("/user/{id}/status")
-    public UserResponse updateStatus(@PathVariable Long id, @RequestParam Status status){
-        return adminService.updateStatus(id,status);
+    public ResponseEntity<UserResponse> updateStatus(@PathVariable Long id, @RequestParam Status status){
+        return ResponseEntity.ok(adminService.updateStatus(id, status));
     }
 
     @PatchMapping("/user/{id}/role")
-    public UserResponse updateRole(@PathVariable Long id, @RequestParam Role role){
-        return adminService.updateRole(id,role);
+    public ResponseEntity<UserResponse> updateRole(@PathVariable Long id, @RequestParam Role role){
+        return ResponseEntity.ok(adminService.updateRole(id, role));
     }
 }

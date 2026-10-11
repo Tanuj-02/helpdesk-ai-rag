@@ -54,17 +54,18 @@ public class DocumentController {
     }
 
     @GetMapping
-    public List<DocumentResponse> getAllDocuments(){
-        return documentService.getAllDocuments();
+    public ResponseEntity<List<DocumentResponse>> getAllDocuments(){
+        return ResponseEntity.ok(documentService.getAllDocuments());
     }
 
     @GetMapping("/{id}")
-    public DocumentResponse getDocumentById(@PathVariable Long id){
-        return documentService.getDocumentById(id);
+    public ResponseEntity<DocumentResponse> getDocumentById(@PathVariable Long id){
+        return ResponseEntity.ok(documentService.getDocumentById(id));
     }
 
     @DeleteMapping("/{id}")
-    public DocumentResponse deleteDocumentById(@PathVariable Long id){
-        return documentService.deleteDocumentById(id);
+    public ResponseEntity<Void> deleteDocumentById(@PathVariable Long id){
+        documentService.deleteDocumentById(id);
+        return ResponseEntity.noContent().build();
     }
 }

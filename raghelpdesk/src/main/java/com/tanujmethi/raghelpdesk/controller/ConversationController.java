@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,30 +24,29 @@ public class ConversationController {
     }
 
     @PostMapping
-    public ConversationResponse createConversation(){
-        return conversationService.createConversation();
+    public ResponseEntity<ConversationResponse> createConversation(){
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(conversationService.createConversation());
     }
 
     @GetMapping("/{conversationId}/messages")
     public ResponseEntity<Page<MessageResponse>> getMessages(@PathVariable Long conversationId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(
-                conversationService.getMessages(conversationId, pageable)
-        );
+        return ResponseEntity.ok(conversationService.getMessages(conversationId, pageable));
     }
 
     @GetMapping
     public ResponseEntity<Page<ConversationResponse>> getMyConversations(@PageableDefault(size = 20, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(
-                conversationService.getMyConversations(pageable)
-        );
+        return ResponseEntity.ok(conversationService.getMyConversations(pageable));
     }
 
     @PatchMapping("/{conversationId}/title")
-    public void updateTitle(@PathVariable Long conversationId, @RequestParam String title) {
+    public ResponseEntity<Void> updateTitle(@PathVariable Long conversationId, @RequestParam String title) {
         conversationService.updateTitle(conversationId, title, currentUserService.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/{conversationId}/model/{model}")
