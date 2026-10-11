@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +24,7 @@ public class TicketController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createTicket(@RequestBody CreateTicketRequest createTicketRequest) {
+    public ResponseEntity<String> createTicket(@Valid @RequestBody CreateTicketRequest createTicketRequest) {
         Long userId = currentUserService.getUserId();
         Long companyId = currentUserService.getCompanyId();
         ticketService.createTicket(createTicketRequest, userId, companyId);
@@ -49,7 +50,7 @@ public class TicketController {
     }
 
     @PutMapping("/{ticketId}")
-    public ResponseEntity<TicketResponse> updateTicket(@PathVariable Long ticketId, @RequestBody UpdateTicketRequest updateTicketRequest) {
+    public ResponseEntity<TicketResponse> updateTicket(@PathVariable Long ticketId, @Valid @RequestBody UpdateTicketRequest updateTicketRequest) {
         Long userId = currentUserService.getUserId();
         Long companyId = currentUserService.getCompanyId();
         String role = currentUserService.getRole();

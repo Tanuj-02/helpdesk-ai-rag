@@ -1,6 +1,7 @@
 package com.tanujmethi.ticketChatService.dto;
 
 import jakarta.persistence.Lob;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -11,6 +12,6 @@ import lombok.*;
 public class ChatMessageDto {
     private Long ticketId;
     private String senderName;
-    @Lob
+    @Lob @NotBlank(message = "message can't be blank")
     private String content;
 }

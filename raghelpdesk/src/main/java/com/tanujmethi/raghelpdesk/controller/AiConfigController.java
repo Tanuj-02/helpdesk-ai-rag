@@ -4,6 +4,7 @@ import com.tanujmethi.raghelpdesk.dto.ApiKeyRequest;
 import com.tanujmethi.raghelpdesk.dto.AiConfigResponse;
 import com.tanujmethi.raghelpdesk.service.AiConfigService;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +24,7 @@ public class AiConfigController {
     }
 
     @PutMapping
-    public ResponseEntity<AiConfigResponse> updateConfig(@RequestBody ApiKeyRequest request) {
+    public ResponseEntity<AiConfigResponse> updateConfig(@Valid @RequestBody ApiKeyRequest request) {
 
         return ResponseEntity.ok(aiConfigService.updateConfig(request));
     }

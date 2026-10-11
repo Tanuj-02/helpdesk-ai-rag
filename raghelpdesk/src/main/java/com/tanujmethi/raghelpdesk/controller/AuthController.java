@@ -5,6 +5,7 @@ import com.tanujmethi.raghelpdesk.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,18 +18,18 @@ public class AuthController {
     }
 
     @PostMapping("/register-company")
-    public ResponseEntity<Void> registerCompany(@RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<Void> registerCompany(@Valid @RequestBody RegisterRequest registerRequest){
         authService.registerCompany(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody EmployeeRegistration employeeRegistration){
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody EmployeeRegistration employeeRegistration){
         return ResponseEntity.ok(authService.register(employeeRegistration));
     }
 
