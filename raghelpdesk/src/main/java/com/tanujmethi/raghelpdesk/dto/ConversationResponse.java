@@ -11,4 +11,5 @@ public class ConversationResponse {
     private Long id;
     private String title;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

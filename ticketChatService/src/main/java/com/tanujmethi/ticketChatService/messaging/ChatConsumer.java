@@ -4,7 +4,9 @@ import com.tanujmethi.ticketChatService.dto.ChatRequest;
 import com.tanujmethi.ticketChatService.entity.Chat;
 import com.tanujmethi.ticketChatService.repository.ChatRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ChatConsumer {
 
     private final ChatRepository chatRepository;

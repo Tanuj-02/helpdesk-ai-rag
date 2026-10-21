@@ -8,6 +8,7 @@ import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.service.auth.CurrentUserService;
 import com.tanujmethi.raghelpdesk.tools.TicketTool;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -23,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @Service
+@Slf4j
 public class AiChatService {
 
     @Value("${spring.ai.google.genai.chat.model}")
@@ -84,8 +86,12 @@ public class AiChatService {
 
         if (conversation.getTitle() == null) {
             CompletableFuture.runAsync(() -> {
-                String title = generateTitle(query, chatClient);
-                conversationService.updateTitle(chatId, title, userId);
+                try {
+                    String title = generateTitle(query, chatClientManager.getOrCreateTitleClient(companyId, apiKey));
+                    conversationService.updateTitle(chatId, title, userId);
+                } catch (Exception e) {
+                    log.warn("Title generation failed for conversation {}", chatId, e);
+                }
             }, titleExecutor);
         }
 

@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatClientManager {
 
     private final Map<Long, ChatClient> clientMap = new ConcurrentHashMap<>();
+    private final Map<Long, ChatClient> titleClientMap = new ConcurrentHashMap<>();
 
     public ChatClient getOrCreate(Long companyId, String apiKey, ChatMemory chatMemory) {
         return clientMap.computeIfAbsent(companyId, id -> createChatClient(apiKey, chatMemory));
@@ -21,6 +22,7 @@ public class ChatClientManager {
 
     public void invalidate(Long companyId) {
         clientMap.remove(companyId);
+        titleClientMap.remove(companyId);
     }
 
     private ChatClient createChatClient(String apiKey, ChatMemory chatMemory) {
@@ -37,5 +39,14 @@ public class ChatClientManager {
                         MessageChatMemoryAdvisor.builder(chatMemory).build()
                 )
                 .build();
+    }
+
+
+    public ChatClient getOrCreateTitleClient(Long companyId, String apiKey) {
+        return titleClientMap.computeIfAbsent(companyId, id -> {
+            Client genAiClient = Client.builder().apiKey(apiKey).build();
+            GoogleGenAiChatModel model = GoogleGenAiChatModel.builder().genAiClient(genAiClient).build();
+            return ChatClient.builder(model).build();
+        });
     }
 }

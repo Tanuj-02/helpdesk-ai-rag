@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class ConversationService {
     private final ConversationRepository conversationRepository;
@@ -57,6 +59,7 @@ public class ConversationService {
 
         return ConversationResponse.builder()
                 .createdAt(conversation.getCreatedAt())
+                .updatedAt(conversation.getUpdatedAt())
                 .id(conversation.getId())
                 .title(conversation.getTitle())
                 .build();
@@ -74,6 +77,12 @@ public class ConversationService {
                 .build();
 
         messageRepository.save(message);
+
+        // Touch the parent conversation so the list can order by last activity.
+        // Nothing else mutates this row, so without it `updatedAt` stays at
+        // creation time and conversations never rise on a new message.
+        conversation.setUpdatedAt(LocalDateTime.now());
+        conversationRepository.save(conversation);
     }
 
     public void updateTitle(Long conversationId, String title, Long userId) {
@@ -127,6 +136,7 @@ public class ConversationService {
                         .id(conversation.getId())
                         .title(conversation.getTitle())
                         .createdAt(conversation.getCreatedAt())
+                        .updatedAt(conversation.getUpdatedAt())
                         .build());
     }
 

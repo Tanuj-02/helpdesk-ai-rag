@@ -45,8 +45,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtService.extractEmail(token);
                 String role = jwtService.extractRole(token);
 
+                ChatUserDetails user = new ChatUserDetails(userId, companyId, email, role);
+
                 UsernamePasswordAuthenticationToken authentication =new UsernamePasswordAuthenticationToken(
-                                userId,
+                                user,
                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );
