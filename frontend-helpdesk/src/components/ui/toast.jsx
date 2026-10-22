@@ -44,7 +44,7 @@ function Toast({
     <ToastPrimitive.Root
       data-slot="toast"
       className={cn(
-        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-none border bg-popover text-popover-foreground shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-lg border border-border bg-popover text-popover-foreground shadow-[var(--shadow-dialog)] will-change-transform outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
         "h-(--height) [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(var(--scale))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms]",
         "after:absolute after:top-full after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-['']",
@@ -73,7 +73,7 @@ function ToastContent({
     <ToastPrimitive.Content
       data-slot="toast-content"
       className={cn(
-        "flex h-full items-center gap-3 overflow-hidden p-4 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100",
+        "flex h-full items-start gap-2.5 overflow-hidden p-3.5 transition-opacity duration-200 ease-[var(--ease-out-quiet)] data-behind:opacity-0 data-expanded:opacity-100",
         className
       )}
       {...props} />
@@ -87,7 +87,7 @@ function ToastTitle({
   return (
     <ToastPrimitive.Title
       data-slot="toast-title"
-      className={cn("text-sm font-medium", className)}
+      className={cn("text-[13px] font-semibold leading-snug", className)}
       {...props} />
   );
 }
@@ -99,7 +99,7 @@ function ToastDescription({
   return (
     <ToastPrimitive.Description
       data-slot="toast-description"
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn("text-[12px] leading-relaxed text-muted-foreground", className)}
       {...props} />
   );
 }
@@ -154,13 +154,13 @@ function ToastIcon({
 
   if (type === "info") {
     icon = (
-      <InfoIcon aria-hidden="true" />
+      <InfoIcon className="text-primary" aria-hidden="true" />
     )
   }
 
   if (type === "warning") {
     icon = (
-      <WarningIcon aria-hidden="true" />
+      <WarningIcon className="text-warning" aria-hidden="true" />
     )
   }
 
@@ -172,7 +172,7 @@ function ToastIcon({
 
   if (type === "loading") {
     icon = (
-      <SpinnerIcon className="animate-spin" aria-hidden="true" />
+      <SpinnerIcon className="animate-spin text-muted-foreground" aria-hidden="true" />
     )
   }
 
@@ -183,7 +183,7 @@ function ToastIcon({
   return (
     <span
       data-slot="toast-icon"
-      className="shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4">
+      className="mt-0.5 shrink-0 text-success [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4">
       {icon}
     </span>
   );

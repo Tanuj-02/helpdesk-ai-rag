@@ -185,8 +185,9 @@ async function handle(request, { params }) {
   }
 
   if (path === "auth/active-users" && method === "GET") {
-    // Demo helper: lists the seeded logins so the sign-in screen can offer
-    // one-click role switching while the backend is unavailable.
+    // Demo accounts belong to the mock data set. Do not offer them as valid
+    // credentials when requests are going to the real backend.
+    if (!isMock) return json(404, { message: "Demo accounts are unavailable in live mode" })
     const { demoAccounts, DEMO_PASSWORD } = await import("@/lib/api/demo-accounts")
     return json(200, { accounts: demoAccounts, password: DEMO_PASSWORD })
   }

@@ -3,6 +3,18 @@
 import * as React from "react"
 import { cn } from "cn"
 
+/**
+ * Table.
+ *
+ * Built for dense, scannable data:
+ *   - 36px header, 40px rows
+ *   - a hairline rule under the header, and between rows
+ *   - uppercase 11px column labels in muted-foreground
+ *   - tabular numerals on anything numeric
+ *
+ * The wrapper scrolls horizontally on small screens rather than squashing
+ * columns, so a wide table stays readable.
+ */
 function Table({
   className,
   ...props
@@ -11,7 +23,7 @@ function Table({
     <div data-slot="table-container" className="relative w-full overflow-x-auto">
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-xs", className)}
+        className={cn("w-full caption-bottom text-[13px]", className)}
         {...props} />
     </div>
   );
@@ -48,7 +60,7 @@ function TableFooter({
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
+      className={cn("border-t bg-surface-sunken font-medium [&>tr]:last:border-b-0", className)}
       {...props} />
   );
 }
@@ -61,7 +73,7 @@ function TableRow({
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "border-b border-border transition-colors duration-150 last:border-b-0 hover:bg-surface-sunken/60 has-aria-expanded:bg-surface-sunken data-[state=selected]:bg-surface-sunken",
         className
       )}
       {...props} />
@@ -76,7 +88,7 @@ function TableHead({
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        "h-9 px-3 text-left align-middle text-[11px] font-medium tracking-[0.04em] whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props} />
@@ -91,7 +103,7 @@ function TableCell({
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "px-3 py-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props} />
@@ -105,7 +117,7 @@ function TableCaption({
   return (
     <caption
       data-slot="table-caption"
-      className={cn("mt-4 text-xs text-muted-foreground", className)}
+      className={cn("mt-3 text-[12px] text-muted-foreground", className)}
       {...props} />
   );
 }

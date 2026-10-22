@@ -14,15 +14,9 @@ import {
 } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Field,
   FieldDescription,
+  FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -84,106 +78,110 @@ export function TicketForm({ session }) {
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      <Button variant="ghost" className="-ml-2 self-start" render={<Link href="/tickets" />}>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 p-4 sm:p-6">
+      <Button variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground" render={<Link href="/tickets" />}>
         <ArrowLeft aria-hidden />
         All tickets
       </Button>
 
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">New ticket</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
+          New ticket
+        </h1>
+        <p className="text-[13px] text-muted-foreground">
           Describe the problem and someone from support will pick it up.
         </p>
       </header>
 
-      <Card>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-lg border border-border bg-surface p-4 sm:p-5"
+      >
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="subject">Subject</FieldLabel>
+            <Input
+              id="subject"
+              required
+              maxLength={120}
+              value={subject}
+              onChange={(event) => {
+                setSubject(event.target.value)
+                setError(null)
+              }}
+              placeholder="Short summary of the problem"
+              disabled={saving}
+              className="h-9"
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="description">Description</FieldLabel>
+            <Textarea
+              id="description"
+              rows={7}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="What happened, what you expected, and anything you already tried."
+              disabled={saving}
+            />
+            <FieldDescription>
+              The assistant can help you draft this from the workspace
+              documents.
+            </FieldDescription>
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field>
-              <FieldLabel htmlFor="subject">Subject</FieldLabel>
-              <Input
-                id="subject"
-                required
-                maxLength={120}
-                value={subject}
-                onChange={(event) => {
-                  setSubject(event.target.value)
-                  setError(null)
-                }}
-                placeholder="Short summary of the problem"
-                disabled={saving}
-              />
+              <FieldLabel htmlFor="priority">Priority</FieldLabel>
+              <Select
+                value={priority}
+                onValueChange={(value) => value && setPriority(value)}
+              >
+                <SelectTrigger id="priority" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(TICKET_PRIORITY).map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {TICKET_PRIORITY_LABEL[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="description">Description</FieldLabel>
-              <Textarea
-                id="description"
-                rows={6}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="What happened, what you expected, and anything you already tried."
-                disabled={saving}
-              />
-              <FieldDescription>
-                The assistant can help you draft this from the workspace
-                documents.
-              </FieldDescription>
+              <FieldLabel htmlFor="category">Category</FieldLabel>
+              <Select
+                value={category}
+                onValueChange={(value) => value && setCategory(value)}
+              >
+                <SelectTrigger id="category" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TICKET_CATEGORY_SUGGESTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
+          </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="priority">Priority</FieldLabel>
-                <Select
-                  value={priority}
-                  onValueChange={(value) => value && setPriority(value)}
-                >
-                  <SelectTrigger id="priority" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(TICKET_PRIORITY).map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {TICKET_PRIORITY_LABEL[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+          {error ? (
+            <p role="alert" className="text-destructive text-[13px]">
+              {error}
+            </p>
+          ) : null}
 
-              <Field>
-                <FieldLabel htmlFor="category">Category</FieldLabel>
-                <Select
-                  value={category}
-                  onValueChange={(value) => value && setCategory(value)}
-                >
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TICKET_CATEGORY_SUGGESTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-
-            {error ? (
-              <p role="alert" className="text-destructive text-sm">
-                {error}
-              </p>
-            ) : null}
-
-            <Button type="submit" className="self-start" disabled={saving || !trimmedSubject}>
-              {saving ? "Creating" : "Create ticket"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <Button type="submit" className="self-start" disabled={saving || !trimmedSubject}>
+            {saving ? "Creating" : "Create ticket"}
+          </Button>
+        </FieldGroup>
+      </form>
     </div>
   )
 }

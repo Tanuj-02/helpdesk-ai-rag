@@ -2,17 +2,12 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { ArrowRight, LockKey } from "@phosphor-icons/react"
 
 import { api, ApiError } from "@/lib/api/client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card"
 import {
   Field,
   FieldDescription,
@@ -65,73 +60,69 @@ export function LoginForm({ className, ...props }) {
 
   return (
     <div className={className} {...props}>
-      <Card>
-        {/* No CardTitle: the page renders the single <h1> for this screen, and
-            repeating it made "Sign in" appear three times in the accessibility
-            tree. CardTitle is a plain <div> anyway, so it could not have served
-            as the heading. */}
-        <CardHeader>
-          <CardDescription>Use the email address your workspace admin invited.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} noValidate>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@company.com"
-                  required
-                  autoComplete="email"
-                  disabled={pending}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </Field>
+      <form onSubmit={handleSubmit} noValidate>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="email">Work email</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@company.com"
+              required
+              autoComplete="email"
+              disabled={pending}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-9"
+            />
+            <FieldDescription>
+              Use the address your workspace admin invited.
+            </FieldDescription>
+          </Field>
 
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  disabled={pending}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </Field>
+          <Field>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              disabled={pending}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-9"
+            />
+          </Field>
 
-              {error ? (
-                <Alert variant="destructive">
-                  <AlertTitle>Sign-in failed</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              ) : null}
+          {error ? (
+            <Alert variant="destructive">
+              <AlertTitle>Sign-in failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-              <Field>
-                <Button type="submit" className="w-full h-10 font-medium shadow-sm" disabled={pending}>
-                  {pending ? <Spinner /> : null}
-                  {pending ? "Signing in..." : "Sign in"}
-                </Button>
-                <FieldDescription className="text-[11px]">
-                  Lost your password? A workspace administrator has to reset it for you.
-                </FieldDescription>
-              </Field>
+          <Field>
+            <Button type="submit" size="touch" className="w-full" disabled={pending}>
+              {pending ? <Spinner /> : null}
+              {pending ? "Signing in" : "Sign in"}
+              {!pending ? <ArrowRight aria-hidden /> : null}
+            </Button>
+            <FieldDescription className="text-[11px]">
+              Lost your password? A workspace administrator has to reset it for
+              you.
+            </FieldDescription>
+          </Field>
 
-              <DemoAccountPicker
-                disabled={pending}
-                onPick={({ email: nextEmail, password: nextPassword }) => {
-                  setEmail(nextEmail)
-                  setPassword(nextPassword)
-                  setError(null)
-                }}
-              />
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
+          <DemoAccountPicker
+            disabled={pending}
+            onPick={({ email: nextEmail, password: nextPassword }) => {
+              setEmail(nextEmail)
+              setPassword(nextPassword)
+              setError(null)
+            }}
+          />
+        </FieldGroup>
+      </form>
     </div>
   )
 }
@@ -161,44 +152,37 @@ export function DemoAccountPicker({ onPick, disabled }) {
   if (accounts.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-2.5 pt-2 border-t border-border/60">
+    <div className="flex flex-col gap-2 border-t border-border pt-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Quick Test-Drive Roles
+        <span className="text-[11px] font-medium text-muted-foreground">
+          Demo accounts
         </span>
-        <span className="text-[10px] text-muted-foreground">Click to fill</span>
+        <span className="text-[11px] text-muted-foreground">
+          Click to fill the form
+        </span>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {accounts.map((account) => {
-          const roleBadgeVariant =
-            account.role === "ADMIN"
-              ? "default"
-              : account.role === "AGENT"
-                ? "secondary"
-                : "outline"
-
-          return (
-            <button
-              key={account.email}
-              type="button"
-              disabled={disabled}
-              onClick={() => onPick({ email: account.email, password })}
-              className="flex flex-col items-start gap-1 rounded-lg border border-border/70 bg-card p-2.5 text-left transition-all hover:border-primary/50 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-            >
-              <div className="flex w-full items-center justify-between">
-                <span className="text-xs font-semibold text-foreground truncate">
-                  {account.name.split(" ")[0]}
-                </span>
-                <Badge variant={roleBadgeVariant} className="text-[9px] px-1.5 py-0 uppercase">
-                  {account.role}
-                </Badge>
-              </div>
-              <span className="text-[10px] text-muted-foreground truncate w-full">
-                {account.email}
+      <div className="grid gap-1.5 sm:grid-cols-2">
+        {accounts.map((account) => (
+          <button
+            key={account.email}
+            type="button"
+            disabled={disabled}
+            onClick={() => onPick({ email: account.email, password })}
+            className="flex flex-col items-start gap-1 rounded-md border border-border bg-surface px-2.5 py-2 text-left transition-colors duration-150 hover:border-border-strong hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50"
+          >
+            <div className="flex w-full items-center justify-between gap-2">
+              <span className="truncate text-[12px] font-medium text-foreground">
+                {account.name.split(" ")[0]}
               </span>
-            </button>
-          )
-        })}
+              <Badge variant="outline" className="shrink-0">
+                {account.role}
+              </Badge>
+            </div>
+            <span className="w-full truncate font-mono text-[11px] text-muted-foreground">
+              {account.email}
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   )

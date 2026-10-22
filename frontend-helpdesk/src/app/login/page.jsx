@@ -2,138 +2,94 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
-  Broadcast,
-  CheckCircle,
-  Database,
+  Building,
   LockKey,
   ShieldCheck,
-  Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 
 import { getServerSession } from "@/lib/auth/server"
 import { BrandMark } from "@/components/brand-mark"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LoginForm } from "@/components/login-form"
-import { Badge } from "@/components/ui/badge"
 
+/** Sign-in with the existing tenant-aware authentication flow. */
 export default async function LoginPage() {
   const session = await getServerSession()
   if (session) redirect(session.role === "ADMIN" ? "/admin/users" : "/tickets")
 
   return (
-    <main className="relative grid min-h-svh lg:grid-cols-12 bg-background">
-      {/* Top Controls */}
-      <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur hover:text-foreground"
-        >
-          <ArrowLeft className="size-3.5" />
-          <span>Home</span>
-        </Link>
-        <ThemeToggle />
-      </div>
+    <main className="login-page flex min-h-svh flex-col bg-background">
+      <header className="flex h-13 shrink-0 items-center justify-between border-b border-border px-4 sm:px-6">
+        <BrandMark />
+        <div className="flex items-center gap-1.5">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-sunken hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden />
+            <span>Back</span>
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
 
-      {/* Left Column: Sign-in form */}
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-10 lg:col-span-5 lg:px-12">
-        <div className="mx-auto w-full max-w-sm space-y-6">
-          <div className="space-y-2">
-            <BrandMark />
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 sm:py-16">
+        <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-8">
+          <div className="login-card w-full">
+            <h1 className="text-[28px] font-medium tracking-tight text-foreground">
               Sign in to your workspace
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Internal helpdesk grounded in verified enterprise documents & real-time agent triage.
+            <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+              Use the work email your workspace admin invited. Your workspace
+              is selected automatically from the domain.
             </p>
+
+            <div className="mt-6">
+              <LoginForm />
+            </div>
           </div>
 
-          <LoginForm />
+          {/*
+            The trust panel. Three plain statements about what the system
+            guarantees, and one honest line about what it does not have yet.
+          */}
+          <aside className="login-story flex flex-col justify-center gap-4"><div className="eyebrow">A LITTLE CLARITY STARTS HERE</div><h2 className="login-story-heading">Your people.<br /><span className="serif-accent">Your knowledge.</span></h2>
+            <div className="flex flex-col gap-3">
+              <TrustRow icon={Building} title="Isolated by tenant">
+                Documents, tickets and chats are partitioned per company. A
+                search never crosses a workspace boundary.
+              </TrustRow>
+              <TrustRow icon={LockKey} title="Session held server-side">
+                Your session token is stored in an httpOnly cookie, so page
+                scripts cannot read it. It expires after 24 hours.
+              </TrustRow>
+              <TrustRow icon={ShieldCheck} title="Grounded answers">
+                The assistant answers only from your company&rsquo;s indexed
+                documents and cites the section it used.
+              </TrustRow>
+            </div>
 
-          <p className="text-center text-[11px] text-muted-foreground">
-            End-to-end encrypted session with JWT &bull; Strictly tenant isolated
-          </p>
-        </div>
-      </div>
-
-      {/* Right Column: Premium Visual Showcase */}
-      <div className="relative hidden lg:col-span-7 lg:flex flex-col justify-between overflow-hidden border-l border-border/50 bg-gradient-to-br from-card via-card/90 to-background p-12">
-        {/* Subtle radial glow */}
-        <div className="pointer-events-none absolute -right-20 -top-20 size-[32rem] rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 size-[32rem] rounded-full bg-chart-1/10 blur-3xl" />
-
-        <div className="relative z-10 flex items-center justify-between">
-          <Badge variant="outline" className="gap-1.5 border-primary/20 bg-primary/5 py-1 text-xs">
-            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-primary">Microservices Online</span>
-          </Badge>
-          <span className="font-mono text-xs text-muted-foreground">
-            v2.4 &bull; Multi-Tenant RAG
-          </span>
-        </div>
-
-        {/* Feature showcase cards */}
-        <div className="relative z-10 my-auto max-w-xl space-y-5">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
-              Verified answers. <br />
-              Zero hallucinations.
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Every assistant response is grounded in approved workspace documents, indexed in
-              Qdrant, and audited by Spring AI before reaching your employees.
+            <p className="border-t border-border pt-4 text-[11px] leading-relaxed text-muted-foreground">
+              Single sign-on is not enabled on this deployment. Credentials are
+              issued and reset by your workspace administrator.
             </p>
-          </div>
-
-          {/* Telemetry card stack */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm shadow-xs space-y-1.5">
-              <div className="flex items-center gap-2 text-primary font-semibold text-xs">
-                <Database className="size-4" />
-                <span>Qdrant Vector DB</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Cosine similarity matching scoped by company tenant id for sub-second retrieval.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm shadow-xs space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-500 font-semibold text-xs">
-                <Broadcast className="size-4" />
-                <span>STOMP WebSockets</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Dedicated ticketChatService on port 8085 providing instant live agent support.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm shadow-xs space-y-1.5">
-              <div className="flex items-center gap-2 text-indigo-500 font-semibold text-xs">
-                <ShieldCheck className="size-4" />
-                <span>Document Audit</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Apache Tika extraction + Spring AI audit pipeline on RabbitMQ before vector storage.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm shadow-xs space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-500 font-semibold text-xs">
-                <LockKey className="size-4" />
-                <span>Enterprise Isolation</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Role-based access control protecting corporate secrets across tickets and chats.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer quote */}
-        <div className="relative z-10 flex items-center justify-between border-t border-border/40 pt-4 text-xs text-muted-foreground">
-          <span>Acme Corp Knowledge Base</span>
-          <span>Security Verified</span>
+          </aside>
         </div>
       </div>
     </main>
+  )
+}
+
+function TrustRow({ icon: Icon, title, children }) {
+  return (
+    <div className="flex gap-2.5">
+      <Icon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[12px] font-medium text-foreground">{title}</span>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          {children}
+        </p>
+      </div>
+    </div>
   )
 }

@@ -5,7 +5,9 @@ import * as React from "react"
 import { api } from "@/lib/api/client"
 import { notify, notifyApiError } from "@/lib/toast"
 import { ROLE_LABEL, ROLES, USER_STATUS_LABEL, USER_STATUSES } from "@/lib/constants"
+import { personInitials } from "@/lib/workspace"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
@@ -25,6 +27,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { EmptyState } from "@/components/empty-state"
+
+const USER_STATUS_VARIANT = {
+  ACTIVE: "success",
+  INVITED: "info",
+  SUSPENDED: "warning",
+  DEACTIVATED: "secondary",
+}
 
 /**
  * Admin user management.
@@ -104,19 +113,30 @@ export function UserAdmin() {
   const rows = result?.content ?? []
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 p-4 sm:p-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">People</h1>
-        <p className="text-muted-foreground text-sm">
-          Everyone in this workspace, and what they can reach.
+        <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
+          People
+        </h1>
+        <p className="max-w-prose text-[13px] leading-relaxed text-muted-foreground">
+          Everyone in this workspace, and what they can reach. Role changes take
+          effect the next time the person loads a page.
         </p>
       </header>
 
-      <div className="bg-background overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
         {loading ? (
-          <div className="flex flex-col gap-2 p-4">
+          <div aria-busy="true">
+            <span className="sr-only">Loading people</span>
             {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-10 w-full" />
+              <div
+                key={index}
+                className="flex items-center gap-3 border-b border-border px-3.5 py-3 last:border-0"
+              >
+                <Skeleton className="size-6" />
+                <Skeleton className="h-3.5 w-36" />
+                <Skeleton className="ml-auto h-3.5 w-24" />
+              </div>
             ))}
           </div>
         ) : error ? (
@@ -133,42 +153,35 @@ export function UserAdmin() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead className="w-36">Role</TableHead>
-                <TableHead className="w-44">Status</TableHead>
+                <TableHead className="w-28">Role</TableHead>
+                <TableHead className="w-36">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((user) => {
-                const initials = user.name
-                  ?.split(" ")
-                  .map((p) => p[0])
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase() || "?"
-
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2.5">
-                        <Avatar className="size-7 ring-1 ring-border">
-                          <AvatarFallback className="text-[10px] font-semibold bg-primary/10 text-primary">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium text-foreground text-sm">{user.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-xs md:table-cell">
-                      {user.email}
-                    </TableCell>
+              {rows.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="size-6">
+                        <AvatarFallback>{personInitials(user.name, user.email)}</AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-foreground">{user.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden font-mono text-[12px] text-muted-foreground md:table-cell">
+                    {user.email}
+                  </TableCell>
                   <TableCell>
                     <Select
                       value={user.role}
                       disabled={busyId === user.id}
                       onValueChange={(value) => value && changeRole(user, value)}
                     >
-                      <SelectTrigger size="sm" className="w-32" aria-label={`Role for ${user.name}`}>
+                      <SelectTrigger
+                        size="sm"
+                        className="w-24"
+                        aria-label={`Role for ${user.name}`}
+                      >
                         <SelectValue>{ROLE_LABEL[user.role] ?? user.role}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -186,8 +199,18 @@ export function UserAdmin() {
                       disabled={busyId === user.id}
                       onValueChange={(value) => value && changeStatus(user, value)}
                     >
-                      <SelectTrigger size="sm" className="w-40" aria-label={`Status for ${user.name}`}>
-                        {busyId === user.id ? <Spinner /> : <SelectValue>{USER_STATUS_LABEL[user.status] ?? user.status}</SelectValue>}
+                      <SelectTrigger
+                        size="sm"
+                        className="w-32"
+                        aria-label={`Status for ${user.name}`}
+                      >
+                        {busyId === user.id ? (
+                          <Spinner className="size-3" />
+                        ) : (
+                          <SelectValue>
+                            {USER_STATUS_LABEL[user.status] ?? user.status}
+                          </SelectValue>
+                        )}
                       </SelectTrigger>
                       <SelectContent>
                         {USER_STATUSES.map((status) => (
@@ -199,8 +222,7 @@ export function UserAdmin() {
                     </Select>
                   </TableCell>
                 </TableRow>
-              );
-            })}
+              ))}
             </TableBody>
           </Table>
         )}
@@ -208,8 +230,10 @@ export function UserAdmin() {
 
       {result && result.totalPages > 1 ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-muted-foreground text-sm">
-            Page {result.number + 1} of {result.totalPages} &middot; {result.totalElements} total
+          <p className="text-[12px] text-muted-foreground">
+            Page <span className="tnum">{result.number + 1}</span> of{" "}
+            <span className="tnum">{result.totalPages}</span> &middot;{" "}
+            <span className="tnum">{result.totalElements}</span> total
           </p>
           <div className="flex gap-2">
             <Button

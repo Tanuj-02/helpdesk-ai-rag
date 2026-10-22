@@ -1,31 +1,28 @@
 "use client"
 
 import * as React from "react"
-import { Key, Trash, Warning } from "@phosphor-icons/react"
+import {
+  Key,
+  LockKey,
+  ShieldCheck,
+  Trash,
+  Warning,
+} from "@phosphor-icons/react"
 
 import { api } from "@/lib/api/client"
 import { notify, notifyApiError } from "@/lib/toast"
 import { AI_MODELS } from "@/lib/constants"
+import { workspaceName, workspaceSlug } from "@/lib/workspace"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -37,7 +34,7 @@ import { Spinner } from "@/components/ui/spinner"
  * That is enforced on the server, and this screen never keeps the value in
  * state after a successful save.
  */
-export function AiSettings() {
+export function AiSettings({ session }) {
   const [state, setState] = React.useState({
     loading: true,
     configured: false,
@@ -127,33 +124,29 @@ export function AiSettings() {
 
   if (state.loading) {
     return (
-      <div className="flex max-w-2xl flex-col gap-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-48 w-full" />
+      <div className="flex flex-col gap-4 p-4 sm:p-6" aria-busy="true">
+        <span className="sr-only">Loading settings</span>
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-40 w-full" />
       </div>
     )
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-3xl flex-col gap-5 p-4 sm:p-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
           Settings
         </h1>
-
-        <p className="text-muted-foreground text-sm">
-          Workspace-wide configuration for the assistant.
+        <p className="text-[13px] text-muted-foreground">
+          Workspace-wide configuration for {workspaceName(session)}.
         </p>
       </header>
 
       {!state.configured ? (
         <Alert variant="destructive">
           <Warning weight="fill" aria-hidden />
-
-          <AlertTitle>
-            The assistant is turned off
-          </AlertTitle>
-
+          <AlertTitle>The assistant is turned off</AlertTitle>
           <AlertDescription>
             Until a Gemini API key is saved here, the assistant is unavailable
             to every member of this workspace.
@@ -161,30 +154,25 @@ export function AiSettings() {
         </Alert>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key weight="bold" aria-hidden />
+      <section className="rounded-lg border border-border bg-surface">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Key className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+          <h2 className="text-[13px] font-semibold text-foreground">
             Gemini API key
-          </CardTitle>
+          </h2>
+        </div>
 
-          <CardDescription>
+        <div className="px-4 py-4">
+          <p className="max-w-prose text-[12px] leading-relaxed text-muted-foreground">
             Used for every AI answer in this workspace. Requests are billed to
             this key, so it belongs to your organisation, not to an individual.
-          </CardDescription>
-        </CardHeader>
+          </p>
 
-        <CardContent>
-          <form
-            id="ai-key-form"
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-4"
-          >
+          <form id="ai-key-form" onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
             <Field>
               <FieldLabel htmlFor="api-key">
                 {state.configured ? "Replace key" : "API key"}
               </FieldLabel>
-
               <Input
                 id="api-key"
                 type="password"
@@ -197,16 +185,13 @@ export function AiSettings() {
                   setError(null)
                 }}
                 disabled={saving}
+                className="h-9 max-w-sm font-mono"
               />
-
               <FieldDescription>
                 {state.configured ? (
                   <>
                     Currently using{" "}
-                    <code className="font-mono">
-                      {state.maskedKey}
-                    </code>
-
+                    <code className="font-mono">{state.maskedKey}</code>
                     {state.updatedAt
                       ? ` (saved ${new Date(
                           state.updatedAt
@@ -221,26 +206,24 @@ export function AiSettings() {
             </Field>
 
             {error ? (
-              <p
-                role="alert"
-                className="text-destructive text-sm"
-              >
+              <p role="alert" className="text-destructive text-[13px]">
                 {error}
               </p>
             ) : null}
 
-            <p className="text-muted-foreground text-xs">
+            <p className="text-[11px] text-muted-foreground">
               Available models:{" "}
               {AI_MODELS.map((model) => model.label).join(", ")}. Members
               choose which one to use in the Assistant screen.
             </p>
           </form>
-        </CardContent>
+        </div>
 
-        <CardFooter className="justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
           <Button
             type="button"
             variant="outline"
+            size="sm"
             disabled={!state.configured || saving}
             onClick={handleRemove}
           >
@@ -248,16 +231,71 @@ export function AiSettings() {
             Remove key
           </Button>
 
-          <Button
-            type="submit"
-            form="ai-key-form"
-            disabled={saving || !trimmed}
-          >
+          <Button type="submit" form="ai-key-form" size="sm" disabled={saving || !trimmed}>
             {saving ? <Spinner /> : null}
             {state.configured ? "Replace key" : "Save key"}
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </section>
+
+      {/*
+        Data isolation and security. This is the section an IT lead or a CISO
+        reads first, so it states plainly what the system does -- and does not
+        pretend to implement features it does not.
+      */}
+      <section className="rounded-lg border border-border bg-surface">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <ShieldCheck className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+          <h2 className="text-[13px] font-semibold text-foreground">
+            Data isolation and security
+          </h2>
+        </div>
+
+        <dl className="flex flex-col">
+          <SecurityRow label="Workspace">
+            <span className="flex items-center gap-2">
+              <span className="font-mono text-[12px]">{workspaceSlug(session)}</span>
+              <Badge variant="outline">tenant {session?.companyId ?? "—"}</Badge>
+            </span>
+          </SecurityRow>
+          <Separator />
+          <SecurityRow label="Retrieval scope">
+            Every vector search is filtered by company id, so one workspace can
+            never retrieve another&rsquo;s documents.
+          </SecurityRow>
+          <Separator />
+          <SecurityRow label="Session">
+            A signed token is held in an httpOnly cookie. Page scripts cannot
+            read it, and it expires after 24 hours.
+          </SecurityRow>
+          <Separator />
+          <SecurityRow label="Your role">
+            <span className="flex items-center gap-2">
+              <LockKey className="size-3 text-muted-foreground" aria-hidden />
+              <span className="text-[12px]">Admin</span>
+            </span>
+          </SecurityRow>
+          <Separator />
+          <SecurityRow label="Billing">
+            AI requests are billed to this workspace&rsquo;s key, never to an
+            individual&rsquo;s account.
+          </SecurityRow>
+        </dl>
+      </section>
+    </div>
+  )
+}
+
+/**
+ * A labelled row inside the security section.
+ */
+function SecurityRow({ label, children }) {
+  return (
+    <div className="grid gap-1 px-4 py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
+      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
+      <dd className="text-[12px] leading-relaxed text-foreground">
+        {typeof children === "string" ? children : children}
+      </dd>
     </div>
   )
 }

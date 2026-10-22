@@ -1,6 +1,13 @@
 import { cva } from "class-variance-authority";
 import { cn } from "cn"
 
+/**
+ * Empty state.
+ *
+ * Left-aligned by default. A centred empty state reads as a marketing page;
+ * inside an application, the eye should land on the first actionable thing
+ * next to it, not on an illustration.
+ */
 function Empty({
   className,
   ...props
@@ -9,7 +16,7 @@ function Empty({
     <div
       data-slot="empty"
       className={cn(
-        "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-none border-dashed p-6 text-center text-balance",
+        "flex w-full min-w-0 flex-1 flex-col items-start justify-center gap-3 p-6 text-left text-balance",
         className
       )}
       {...props} />
@@ -23,18 +30,19 @@ function EmptyHeader({
   return (
     <div
       data-slot="empty-header"
-      className={cn("flex max-w-sm flex-col items-center gap-2", className)}
+      className={cn("flex max-w-prose flex-col items-start gap-1.5", className)}
       {...props} />
   );
 }
 
 const emptyMediaVariants = cva(
-  "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-8 shrink-0 items-center justify-center rounded-none bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4",
+        icon:
+          "flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-sunken text-muted-foreground [&_svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: {
@@ -52,7 +60,7 @@ function EmptyMedia({
     <div
       data-slot="empty-icon"
       data-variant={variant}
-      className={cn(emptyMediaVariants({ variant, className }))}
+      className={cn(emptyMediaVariants({ variant, className }), className)}
       {...props} />
   );
 }
@@ -64,7 +72,7 @@ function EmptyTitle({
   return (
     <div
       data-slot="empty-title"
-      className={cn("font-heading text-sm font-medium", className)}
+      className={cn("font-heading text-[13px] font-semibold text-foreground", className)}
       {...props} />
   );
 }
@@ -77,7 +85,7 @@ function EmptyDescription({
     <div
       data-slot="empty-description"
       className={cn(
-        "text-xs/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        "max-w-prose text-[12px] leading-relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
       )}
       {...props} />
@@ -92,7 +100,7 @@ function EmptyContent({
     <div
       data-slot="empty-content"
       className={cn(
-        "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-xs text-balance",
+        "flex w-full max-w-prose min-w-0 flex-col items-start gap-2 text-[12px] text-balance",
         className
       )}
       {...props} />

@@ -1,16 +1,27 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import "./experience.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/**
+ * Inter for UI text. Its tall x-height and open apertures stay legible at
+ * 12-13px, which is the size most of this product's dense screens live at.
+ */
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/**
+ * JetBrains Mono for ticket ids, tenant slugs and code fragments. A tabular
+ * mono means `#1042` and `acme-corp` line up in columns.
+ */
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono-jetbrains",
   subsets: ["latin"],
+  display: "swap",
 });
 
 /**
@@ -34,7 +45,7 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
