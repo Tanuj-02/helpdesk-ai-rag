@@ -180,7 +180,6 @@ export function TicketChat({ session, ticketId }) {
       if (mode === "live") {
         const published = clientRef.current?.publish("/app/ticket/chat", {
           ticketId,
-          senderName: session.name ?? "",
           content,
         })
         if (!published) {

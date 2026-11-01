@@ -139,8 +139,9 @@
  * One message in a ticket's owner<->agent conversation.
  *
  * This is `ticketChatService.ChatResponseDto` -- a **separate backend service**
- * from `raghelpdesk`. Note it denormalises the sender's display name instead of
- * nesting a user, and `senderId` is the only way to tell who wrote it.
+ * from `raghelpdesk`. The chat service resolves the sender's display name
+ * from its shared user database and stores it with new messages. Older messages
+ * without a stored name are resolved when history is read.
  *
  * @typedef {Object} TicketChatMessage
  * @property {number} id

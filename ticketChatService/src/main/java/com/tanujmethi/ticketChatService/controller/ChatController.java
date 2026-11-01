@@ -3,11 +3,10 @@ package com.tanujmethi.ticketChatService.controller;
 import com.tanujmethi.ticketChatService.dto.ChatMessageDto;
 import com.tanujmethi.ticketChatService.dto.ChatResponseDto;
 import com.tanujmethi.ticketChatService.dto.ChatUserDetails;
-import com.tanujmethi.ticketChatService.entity.ChatMessage;
 import com.tanujmethi.ticketChatService.service.ChatService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,13 +25,11 @@ public class ChatController {
     }
 
     @MessageMapping("/ticket/chat")
-    public ResponseEntity<Void> sendMessage(ChatMessageDto request, Principal principal) {
+    public ResponseEntity<Void> sendMessage(@Valid ChatMessageDto request, Principal principal) {
 
         ChatUserDetails user = (ChatUserDetails) ((Authentication) principal).getPrincipal();
 
-        Long userId = user.userId();
-
-        ChatResponseDto message = chatService.saveMessage(request, userId);
+        ChatResponseDto message = chatService.saveMessage(request, user);
 
         messagingTemplate.convertAndSend("/topic/ticket/" + request.getTicketId(), message);
 

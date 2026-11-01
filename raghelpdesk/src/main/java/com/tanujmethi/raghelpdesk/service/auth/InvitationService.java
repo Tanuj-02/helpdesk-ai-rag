@@ -121,8 +121,7 @@ public class InvitationService {
                     continue;
                 }
 
-                if (companyInvitationRepository.existsByEmailIgnoreCaseAndCompany_Id(
-                        email, companyId)) {
+                if (companyInvitationRepository.existsByEmailIgnoreCaseAndCompany_Id(email, companyId)) {
                     continue;
                 }
 

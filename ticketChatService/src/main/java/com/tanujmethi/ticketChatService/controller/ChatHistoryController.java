@@ -27,7 +27,6 @@ public class ChatHistoryController {
     public ResponseEntity<List<ChatResponseDto>> getMessages(@PathVariable Long ticketId, Principal principal) {
         ChatUserDetails user = (ChatUserDetails) ((Authentication) principal).getPrincipal();
 
-        Long userId = user.userId();
-        return ResponseEntity.ok(chatService.getMessages(ticketId, userId));
+        return ResponseEntity.ok(chatService.getMessages(ticketId, user));
     }
 }

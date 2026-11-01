@@ -66,7 +66,7 @@ The repository contains separate Maven projects for the five Java services and a
 
 1. Start MySQL and Qdrant with `docker compose -f raghelpdesk/compose.yaml up -d`.
 2. Start RabbitMQ with `docker compose -f rabbitmq/docker-compose.yml up -d`. Its management UI is exposed on port `15672` by the local Compose file.
-3. Configure each service using the environment variables referenced in its `src/main/resources/application.properties`. Configure `HELPDESK_API_MODE=live`, `HELPDESK_API_URL`, and `HELPDESK_TICKET_CHAT_URL` for the frontend. Keep credentials in local environment files or a secret manager, outside Git.
+3. Configure each service using the environment variables referenced in its `src/main/resources/application.properties`. Configure `HELPDESK_API_MODE=live`, `HELPDESK_API_URL`, and `HELPDESK_TICKET_CHAT_URL` for the frontend. Set `APP_WEBSOCKET_ALLOWED_ORIGINS` on `ticketChatService` to the frontend's exact origin (for example, `https://helpdesk.example.com`; comma-separate multiple origins). Local development defaults to `http://localhost:3000` and `http://127.0.0.1:3000`. Keep credentials in local environment files or a secret manager, outside Git.
 4. Start the Java services from their directories with `./mvnw spring-boot:run` (or `mvnw.cmd` on Windows).
 5. In `frontend-helpdesk`, run `npm ci` and `npm run dev`, then open `http://localhost:3000`.
 
@@ -74,4 +74,4 @@ The core API uses port `8080` by default; ticket chat uses `8085` and email uses
 
 ## Current status
 
-This is a locally running portfolio project. The Java modules compile and the frontend passes lint and a webpack production build. Before a public deployment, the WebSocket subscription authorization, document-deletion vector cleanup, fresh-user token initialization, integration tests, and deployment hardening need attention. The current document delete endpoint removes the S3 object but does **not** publish a Qdrant purge event; the vector delete queue is currently used by the rejection flow.
+This is a locally running portfolio project. Ticket chat now checks the authenticated user's company and ticket membership for subscriptions, message sends, and history reads; the STOMP endpoint accepts configured frontend origins. The focused chat authorization tests pass, but a live WebSocket integration check is still needed. Before a public deployment, document-deletion vector cleanup, fresh-user token initialization, broader integration tests, and deployment hardening need attention. The current document delete endpoint removes the S3 object but does **not** publish a Qdrant purge event; the vector delete queue is currently used by the rejection flow.
