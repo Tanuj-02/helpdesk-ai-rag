@@ -29,24 +29,29 @@ public class RabbitMqConsumer {
                 () -> new AppException("Company Document Not Found")
         );
 
-        if (document.getStatus() == DocumentStatus.DELETED) {
+        Long companyId = document.getCompany().getId();
+        if (!companyId.equals(documentVerificationResultDto.getCompanyId())) {
+            throw new AppException("Verification result company does not match document");
+        }
+
+        DocumentStatus status = documentVerificationResultDto.isApproved()
+                ? DocumentStatus.APPROVED : DocumentStatus.REJECTED;
+        String reason = documentVerificationResultDto.isApproved()
+                ? null : documentVerificationResultDto.getReason();
+        int updated = companyDocumentRepository.updateVerificationResultIfNotDeleted(
+                document.getId(), companyId, status, reason, DocumentStatus.DELETED);
+        if (updated == 0) {
             return;
         }
 
-        if(documentVerificationResultDto.isApproved()){
-            document.setStatus(DocumentStatus.APPROVED);
-        } else{
-
-            document.setStatus(DocumentStatus.REJECTED);
+        if (!documentVerificationResultDto.isApproved()) {
             s3StorageService.delete(document.getS3Key());
             rabbitMqPublisher.publishDeleteVector(
                     VectorDocumentDeleteEvent.builder()
                             .documentId(document.getId())
-                            .companyId(documentVerificationResultDto.getCompanyId())
+                            .companyId(companyId)
                             .build()
             );
-            document.setRejectionReason(documentVerificationResultDto.getReason());
         }
-        companyDocumentRepository.save(document);
     }
 }

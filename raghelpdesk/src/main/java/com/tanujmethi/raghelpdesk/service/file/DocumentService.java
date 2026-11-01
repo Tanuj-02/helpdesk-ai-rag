@@ -3,6 +3,7 @@ package com.tanujmethi.raghelpdesk.service.file;
 import com.tanujmethi.raghelpdesk.dto.DocumentResponse;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadEvent;
 import com.tanujmethi.raghelpdesk.dto.DocumentUploadRequest;
+import com.tanujmethi.raghelpdesk.dto.VectorDocumentDeleteEvent;
 import com.tanujmethi.raghelpdesk.entity.Company;
 import com.tanujmethi.raghelpdesk.entity.CompanyDocument;
 import com.tanujmethi.raghelpdesk.enums.DocumentStatus;
@@ -157,10 +158,17 @@ public class DocumentService {
 
         CompanyDocument document = companyDocumentRepository.findByIdAndCompanyId(id, companyId).orElseThrow();
 
-        document.setStatus(DocumentStatus.DELETED);
-        s3StorageService.delete(document.getS3Key());
+        if (document.getStatus() != DocumentStatus.DELETED) {
+            s3StorageService.delete(document.getS3Key());
+            document.setStatus(DocumentStatus.DELETED);
+            companyDocumentRepository.save(document);
+        }
 
-        companyDocumentRepository.save(document);
+        // Repeat the purge on repeated requests so a failed publish can be retried.
+        rabbitMqPublisher.publishDeleteVector(VectorDocumentDeleteEvent.builder()
+                .documentId(document.getId())
+                .companyId(document.getCompany().getId())
+                .build());
 
         return DocumentResponse.builder()
                 .id(id)
