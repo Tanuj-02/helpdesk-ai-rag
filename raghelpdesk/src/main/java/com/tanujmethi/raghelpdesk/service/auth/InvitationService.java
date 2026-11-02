@@ -47,8 +47,8 @@ public class InvitationService {
 
         User adminUser = userRepository.findByEmail(email).orElseThrow(
                 () -> {
-                    System.out.println("Admin not found");
-                    return new ResourceNotFoundException("Admin not found");}
+                    return new ResourceNotFoundException("Admin not found");
+                }
         );
 
         if(adminUser.getRole() != Role.ADMIN){
@@ -117,13 +117,10 @@ public class InvitationService {
                 String email = employee.getEmail().trim();
 
                 if(userRepository.existsByEmail(email)){
-                    System.out.println("Already exists: " + email);
                     continue;
                 }
 
-                if (companyInvitationRepository.existsByEmailIgnoreCaseAndCompany_Id(email, companyId)) {
-                    continue;
-                }
+                if (companyInvitationRepository.existsByEmailIgnoreCaseAndCompany_Id(email, companyId)) continue;
 
                 String token = jwtService.generateInvitationToken(email, companyId, employee.getRole().name());
 

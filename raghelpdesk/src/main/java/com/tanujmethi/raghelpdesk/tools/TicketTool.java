@@ -33,19 +33,11 @@ public class TicketTool {
             @ToolParam(description = "Short summary/title of the issue") String subject,
             @ToolParam(description = "Internal AI summary of issue and troubleshooting steps attempted") String aiSummary,
             @ToolParam(description = "Current chat conversation ID") Long conversationId,
-            @ToolParam(description = "Priority: LOW, MEDIUM, HIGH, or URGENT")
-            String priority,
-            @ToolParam(description = "Category such as Account, Billing, Technical, Hardware, Software, or Other")
-            String category,
-            ToolContext toolContext
-    ){
+            @ToolParam(description = "Priority: LOW, MEDIUM, HIGH, or URGENT") String priority,
+            @ToolParam(description = "Category such as Account, Billing, Technical, Hardware, Software, or Other") String category,
+            ToolContext toolContext){
         Long userId = (Long) toolContext.getContext().get("userId");
         Long companyId = (Long) toolContext.getContext().get("companyId");
-        System.out.println("========== TICKET TOOL START ==========");
-        System.out.println("subject = " + subject);
-        System.out.println("conversationId = " + conversationId);
-        System.out.println("priority = " + priority);
-        System.out.println("category = " + category);
         try{
             CreateTicketRequest request = CreateTicketRequest.builder()
                     .ticketPriority(TicketPriority.valueOf(priority.toUpperCase()))
@@ -54,10 +46,8 @@ public class TicketTool {
                     .aiSummary(aiSummary)
                     .subject(subject)
                     .build();
-            System.out.println("Calling ticketService.createTicket()...");
 
             TicketResponse ticket = ticketService.createTicket(request, userId, companyId);
-            System.out.println("ticket created successfully...");
 
             return Map.of(
                     "success", true,
@@ -65,8 +55,6 @@ public class TicketTool {
                     "message", "Ticket created successfully"
             );
         } catch (Exception e){
-            System.out.println("TICKET CREATION ERROR: " + e.getClass().getName());
-            System.out.println("ERROR MESSAGE: " + e.getMessage());
             e.printStackTrace();
             return Map.of(
                     "success", false,
@@ -84,10 +72,8 @@ public class TicketTool {
            open tickets before updating them.
         """)
     public List<TicketResponse> searchMyTickets(
-            @ToolParam(description = "Description or keyword describing the ticket")
-            String query,
-            ToolContext toolContext
-    ) {
+            @ToolParam(description = "Description or keyword describing the ticket") String query,
+            ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         return ticketService.searchMyTickets(query, userId);
     }
@@ -104,23 +90,12 @@ public class TicketTool {
     for each ticket with status CLOSED.
     """)
     public Object updateTicket(
-
-            @ToolParam(description = "ID of the ticket to update")
-            Long ticketId,
-
-            @ToolParam(description = "New ticket status, or null if unchanged")
-            String status,
-
-            @ToolParam(description = "New priority, or null if unchanged")
-            String priority,
-
-            @ToolParam(description = "New subject, or null if unchanged")
-            String subject,
-
-            @ToolParam(description = "Updated AI summary, or null if unchanged")
-            String aiSummary,
-            ToolContext toolContext
-    ) {
+            @ToolParam(description = "ID of the ticket to update") Long ticketId,
+            @ToolParam(description = "New ticket status, or null if unchanged") String status,
+            @ToolParam(description = "New priority, or null if unchanged") String priority,
+            @ToolParam(description = "New subject, or null if unchanged") String subject,
+            @ToolParam(description = "Updated AI summary, or null if unchanged") String aiSummary,
+            ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         Long companyId = (Long) toolContext.getContext().get("companyId");
         String role = (String) toolContext.getContext().get("role");
@@ -128,22 +103,17 @@ public class TicketTool {
             UpdateTicketRequest request = new UpdateTicketRequest();
 
             if (status != null) {
-                request.setTicketStatus(
-                        TicketStatus.valueOf(status.toUpperCase())
-                );
+                request.setTicketStatus(TicketStatus.valueOf(status.toUpperCase()));
             }
 
             if (priority != null) {
-                request.setTicketPriority(
-                        TicketPriority.valueOf(priority.toUpperCase())
-                );
+                request.setTicketPriority(TicketPriority.valueOf(priority.toUpperCase()));
             }
 
             request.setSubject(subject);
             request.setAiSummary(aiSummary);
 
-            TicketResponse ticket =
-                    ticketService.updateTicket(ticketId, request, userId, companyId, role);
+            TicketResponse ticket = ticketService.updateTicket(ticketId, request, userId, companyId, role);
 
             return Map.of(
                     "success", true,

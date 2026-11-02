@@ -23,7 +23,6 @@ public class CurrentUserService {
     }
 
     public String getEmail() {
-        System.out.println(get().email());
         return get().email();
     }
 

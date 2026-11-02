@@ -105,9 +105,7 @@ public class DocumentVerificationConsumer {
             }
 
         } catch (Exception e) {
-
             System.err.println("Failed to process document: " + request.getDocumentId());
-
             e.printStackTrace();
 
             throw new RuntimeException("Failed to process document: " + request.getDocumentId(), e);

@@ -177,6 +177,11 @@
        not jitter as they change. */
     font-variant-numeric: tabular-nums;
     -webkit-text-size-adjust: 100%;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
   }
 
   body {

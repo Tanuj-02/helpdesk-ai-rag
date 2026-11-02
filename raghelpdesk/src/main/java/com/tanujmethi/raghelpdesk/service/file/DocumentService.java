@@ -80,7 +80,6 @@ public class DocumentService {
         companyDocument.setS3Key(s3Key);
         companyDocument.setStatus(DocumentStatus.UPLOADED);
         companyDocumentRepository.save(companyDocument);
-        System.out.println("S3 KEY BEFORE PUBLISH: " + s3Key);
         DocumentUploadEvent request = DocumentUploadEvent.builder()
                 .requestId(UUID.randomUUID().toString())
                 .documentId(companyDocument.getId())
@@ -164,7 +163,6 @@ public class DocumentService {
             companyDocumentRepository.save(document);
         }
 
-        // Repeat the purge on repeated requests so a failed publish can be retried.
         rabbitMqPublisher.publishDeleteVector(VectorDocumentDeleteEvent.builder()
                 .documentId(document.getId())
                 .companyId(document.getCompany().getId())

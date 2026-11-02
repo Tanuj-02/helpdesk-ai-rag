@@ -37,9 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        System.out.println("DISPATCH TYPE: " + request.getDispatcherType());
-        System.out.println("REQUEST URI: " + request.getRequestURI());
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -48,23 +45,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String token = authHeader.substring(7);
 
         try {
-
             String tokenType = jwtService.extractTokenType(token);
-
             if (!"ACCESS".equals(tokenType)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             Long userId = jwtService.extractUserId(token);
-
             if (userId == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             User user = userRepository.findById(userId).orElseThrow(null);
-
             if(user == null){
                 filterChain.doFilter(request,response); return;
             }
@@ -80,41 +71,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 if (jwtService.isTokenValid(token)) {
-
-                    CurrentUser currentUser = new CurrentUser(
-                            userId,
-                            jwtService.extractCompanyId(token),
-                            email,
-                            jwtService.extractRole(token)
-                    );
+                    CurrentUser currentUser = new CurrentUser(userId, jwtService.extractCompanyId(token), email, jwtService.extractRole(token));
 
                     UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    currentUser,
-                                    null,
-                                    List.of(
-                                            new SimpleGrantedAuthority(
-                                                    "ROLE_" + currentUser.role()
-                                            )
+                            new UsernamePasswordAuthenticationToken(currentUser, null,
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + currentUser.role())
                                     )
                             );
 
-                    authenticationToken.setDetails(
-                            new WebAuthenticationDetailsSource()
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource()
                                     .buildDetails(request)
                     );
 
                     SecurityContextHolder.getContext()
                             .setAuthentication(authenticationToken);
-
-                    System.out.println("AUTHENTICATED: " + currentUser.email());
                 }
             }
 
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
-
-            System.out.println("Invalid JWT: " + e.getClass().getSimpleName());
         }
 
         filterChain.doFilter(request, response);
