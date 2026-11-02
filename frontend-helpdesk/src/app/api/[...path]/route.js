@@ -56,13 +56,13 @@ function json(status, data) {
 }
 
 /**
- * Spring Security rejects with 403 and a genuinely empty body, which the
- * browser reports as an opaque network failure. Every 403 gets a real message.
+ * Spring Security can reject requests with an empty body. Give unauthenticated
+ * requests a clear sign-in response and keep permission failures distinct.
  */
 function normalizeError(status) {
   const messages = {
     401: "Your session has ended. Please sign in again.",
-    403: "You do not have access to this resource.",
+    403: "You do not have permission to do that.",
     404: "That resource does not exist.",
   }
   return json(status, {
@@ -253,7 +253,7 @@ async function handle(request, { params }) {
     }
 
     if (result.empty) {
-      if (result.status === 403) return normalizeError(403)
+      if (result.status === 403) return normalizeError(token ? 403 : 401)
       return noStore(new Response(null, { status: result.status }))
     }
 
@@ -343,13 +343,11 @@ async function handle(request, { params }) {
     })
   }
 
-  if (upstream.status === 403) {
-    // Do NOT await this. Cancelling a body of a Next-patched `fetch` response
-    // can deadlock in dev, and the normalised 403 would then never be sent --
-    // the request hangs until the client times out. Fire and forget instead;
-    // the upstream connection is still released.
+  if (upstream.status === 403 && !sessionFromToken(token)) {
+    // The backend still emits a bare 403 for some missing/expired tokens.
+    // Do not await cancel: Next's patched fetch can hang in development.
     upstream.body?.cancel().catch(() => {})
-    return normalizeError(403)
+    return normalizeError(401)
   }
 
   const isLogin = (path === "auth/login" || path === "auth/register") && upstream.status === 200

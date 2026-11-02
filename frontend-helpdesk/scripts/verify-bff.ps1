@@ -160,7 +160,7 @@ catch {
 Write-Head "Unauthenticated access"
 $anon = New-Session
 Assert-Equal "no session -> 401"                 (Get-Status "$BaseUrl/api/auth/session" $anon) 401
-Assert-Equal "no token -> 403"                   (Get-Status "$BaseUrl/api/ticket/my-tickets" $anon) 403
+Assert-Equal "no token -> 401"                   (Get-Status "$BaseUrl/api/ticket/my-tickets" $anon) 401
 Assert-Equal "anonymous /tickets -> /login"      (Get-Redirect "$BaseUrl/tickets" $anon) "307|/login?next=%2Ftickets"
 
 Write-Head "Employee (sam@acme.com)"

@@ -193,9 +193,9 @@ export async function routeMock({ method, path, query, body, formData, token }) 
     const user = store.users.find(
       (u) => u.email?.toLowerCase() === String(body?.email ?? "").toLowerCase(),
     )
-    if (!user) return appError("User Not found")
+    if (!user) return appError("Email or password is incorrect.", 401)
     if (user.password !== body?.password) {
-      return { status: 401, empty: true }
+      return appError("Email or password is incorrect.", 401)
     }
     if (user.status !== USER_STATUS.ACTIVE) {
       return appError(`Your account is ${user.status}, Please contact your admin `)

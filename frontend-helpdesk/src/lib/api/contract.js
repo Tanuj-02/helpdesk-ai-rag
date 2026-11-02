@@ -32,9 +32,9 @@
 /**
  * Error body from `GlobalExceptionHandler`.
  *
- * NOTE: this shape only applies to `AppException` (400) and the catch-all
- * (500). Spring Security rejections -- which is what you get for a missing or
- * expired token -- return 403 with a COMPLETELY EMPTY body.
+ * Domain, validation, and malformed-request errors use this shape. The BFF
+ * maps missing or expired sessions to 401, and a bare 403 remains possible
+ * for authenticated requests blocked by Spring Security.
  *
  * @typedef {Object} ErrorResponse
  * @property {number} status

@@ -10,6 +10,7 @@ import com.tanujmethi.raghelpdesk.exception.AppException;
 import com.tanujmethi.raghelpdesk.exception.DuplicateResourceException;
 import com.tanujmethi.raghelpdesk.exception.InvalidTokenException;
 import com.tanujmethi.raghelpdesk.exception.ResourceNotFoundException;
+import com.tanujmethi.raghelpdesk.exception.UnauthorizedException;
 import com.tanujmethi.raghelpdesk.repository.CompanyInvitationRepository;
 import com.tanujmethi.raghelpdesk.repository.CompanyRepository;
 import com.tanujmethi.raghelpdesk.repository.UserRepository;
@@ -18,6 +19,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -71,9 +74,12 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        } catch (BadCredentialsException | UsernameNotFoundException ex) {
+            throw new UnauthorizedException("Email or password is incorrect.");
+        }
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()-> new ResourceNotFoundException("User Not found"));
 
         if(user.getStatus() != Status.ACTIVE){

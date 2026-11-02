@@ -7,6 +7,7 @@
  */
 
 import { ROLE, TICKET_LIST_ENDPOINT } from "@/lib/constants"
+import { apiErrorMessage } from "@/lib/api/error-message"
 
 /**
  * A normalised error. Every failure the UI can encounter -- BFF rejection,
@@ -28,7 +29,7 @@ export class ApiError extends Error {
 
   /** True when the user simply needs to sign in again. */
   get isAuthError() {
-    return this.status === 401 || this.status === 403
+    return this.status === 401
   }
 
   /** True when the backend is unreachable or erroring, not the user's fault. */
@@ -73,12 +74,12 @@ async function request(path, options = {}) {
   if (response.status === 204) return null
 
   const contentType = response.headers.get("content-type") ?? ""
-  const payload = contentType.includes("application/json")
+  const payload = contentType.includes("json")
     ? await response.json().catch(() => null)
     : await response.text().catch(() => "")
 
   if (!response.ok) {
-    throw new ApiError(payload?.message || `Request failed (${response.status})`, {
+    throw new ApiError(apiErrorMessage(response.status, payload, path), {
       status: response.status,
       path,
       body: payload,
@@ -302,7 +303,7 @@ export async function streamChat({ query, chatId, model }, onChunk, signal) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null)
-    throw new ApiError(body?.message || `The assistant failed (${response.status})`, {
+    throw new ApiError(apiErrorMessage(response.status, body, "ai/chat"), {
       status: response.status,
       path: "ai/chat",
     })

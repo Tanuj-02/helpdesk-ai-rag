@@ -58,10 +58,10 @@ export const notify = {
  */
 export function notifyApiError(error, fallbackTitle = "Something went wrong") {
   const message = error?.message ?? fallbackTitle
-  // 401/403 are almost always an expired session; the proxy will bounce the
-  // user to /login shortly, so do not shout about it.
+  // A 401 means the session is absent or expired. A 403 is a permission error
+  // and should remain visible to the user.
   if (error?.isAuthError) {
-    notify.warning("Your session has ended", { description: "Redirecting you to sign in." })
+    notify.warning("Your session has ended", { description: "Please sign in again." })
     return message
   }
   notify.error(message, { description: fallbackTitle === message ? undefined : fallbackTitle })

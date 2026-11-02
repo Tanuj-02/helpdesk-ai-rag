@@ -48,12 +48,11 @@ export function LoginForm({ className, ...props }) {
         router.replace(result?.role === "ADMIN" ? "/admin/users" : "/tickets")
         router.refresh()
       } catch (err) {
-        // The backend returns a bare 403 for bad credentials, and 400 with a
-        // message for an unknown account. Both collapse to one safe message
-        // so the form never leaks which emails exist.
+        // Keep incorrect email and password indistinguishable so sign-in does
+        // not reveal which accounts exist.
         setError(
-          err instanceof ApiError && err.isAuthError
-            ? "Those details did not match an active account."
+          err instanceof ApiError && err.status === 401
+            ? "Email or password is incorrect."
             : (err?.message ?? "Something went wrong. Please try again."),
         )
       }
@@ -62,7 +61,7 @@ export function LoginForm({ className, ...props }) {
 
   return (
     <div className={className} {...props}>
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit}>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="email">Work email</FieldLabel>
