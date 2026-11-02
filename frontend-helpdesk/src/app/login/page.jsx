@@ -40,8 +40,8 @@ export default async function LoginPage() {
               Sign in to your workspace
             </h1>
             <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-              Use the work email your workspace admin invited. Your workspace
-              is selected automatically from the domain.
+              Use the email linked to your workspace account. New companies can
+              create an administrator account here too.
             </p>
 
             <div className="mt-6">

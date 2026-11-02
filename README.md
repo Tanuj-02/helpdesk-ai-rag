@@ -49,7 +49,7 @@ Ticket creation follows a separate path: `raghelpdesk` publishes to `chat.exchan
 
 ## Product features
 
-- Company-based accounts with `ADMIN`, `AGENT`, and `EMPLOYEE` roles and JWT authentication.
+- Company signup creates the first `ADMIN`; invited `AGENT` and `EMPLOYEE` users complete registration from emailed links. Accounts use JWT authentication.
 - Ticket creation, assignment, status updates, priority levels, and real-time ticket conversations.
 - Company-scoped RAG over approved documents, with streamed AI responses and conversation history.
 - AI tools that can search, create, and update support tickets.
@@ -74,4 +74,4 @@ The core API uses port `8080` by default; ticket chat uses `8085` and email uses
 
 ## Current status
 
-This is a locally running portfolio project. Ticket chat checks the authenticated user's company and ticket membership for subscriptions, sends, and history reads; the STOMP endpoint accepts configured frontend origins. Document deletion now publishes a Qdrant purge event, and the vector worker checks MySQL document status around indexing. Focused tests pass, but live WebSocket and upload-to-delete integration checks remain. Before a public deployment, reliable RabbitMQ publishing and recovery, fresh-user token initialization, broader integration tests, and deployment hardening need attention.
+This is a locally running portfolio project. Ticket chat checks the authenticated user's company and ticket membership for subscriptions, sends, and history reads; the STOMP endpoint accepts configured frontend origins. Document deletion publishes a Qdrant purge event, and the vector worker checks MySQL document status around indexing. New users start with token version 0. Focused tests pass, but live WebSocket and upload-to-delete integration checks remain. Before a public deployment, existing null token versions need a database migration, and reliable RabbitMQ publishing and recovery, broader integration tests, and deployment hardening need attention.

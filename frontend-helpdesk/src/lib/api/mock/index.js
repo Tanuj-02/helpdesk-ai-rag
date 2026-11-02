@@ -214,21 +214,31 @@ export async function routeMock({ method, path, query, body, formData, token }) 
   }
 
   if (root === "auth" && rest[0] === "register-company" && method === "POST") {
-    const email = String(body?.companyEmail ?? "").toLowerCase()
-    if (store.users.some((u) => u.email?.toLowerCase() === email)) {
-      return appError("Admin user already exists")
+    const companyEmail = String(body?.companyEmail ?? "").trim().toLowerCase()
+    const adminEmail = String(body?.adminEmail ?? "").trim().toLowerCase()
+    if (!body?.companyName || !companyEmail || !body?.adminName || !adminEmail || !body?.password) {
+      return appError("All registration fields are required")
+    }
+    if (store.company.email?.toLowerCase() === companyEmail ||
+        store.users.some((u) => u.companyEmail === companyEmail)) {
+      return appError("Company Already Exists")
+    }
+    if (store.users.some((u) => u.email?.toLowerCase() === adminEmail)) {
+      return appError("Admin already exists")
     }
     store.users.push({
       id: store.nextUserId(),
-      name: body?.adminName ?? "Admin",
-      email,
-      password: body?.password ?? "",
+      name: body.adminName,
+      email: adminEmail,
+      password: body.password,
       role: ROLE.ADMIN,
       status: USER_STATUS.ACTIVE,
-      companyId: store.companyId,
+      companyId: store.nextCompanyId(),
+      companyName: body.companyName,
+      companyEmail,
       createAt: new Date().toISOString(),
     })
-    return { status: 200, empty: true }
+    return { status: 201, empty: true }
   }
 
   if (root === "auth" && rest[0] === "register" && method === "POST") {
@@ -246,7 +256,7 @@ export async function routeMock({ method, path, query, body, formData, token }) 
         name: actor.name,
         companyId: actor.companyId,
         email: actor.email,
-        companyName: store.companyName,
+        companyName: actor.companyName ?? store.companyName,
         role: actor.role,
       },
     }
@@ -262,7 +272,7 @@ export async function routeMock({ method, path, query, body, formData, token }) 
     if (!valid.includes(body?.ticketPriority)) return notFound()
 
     // The real backend 500s when a company has no AGENT to assign to.
-    const agents = store.users.filter((u) => u.role === ROLE.AGENT)
+    const agents = store.users.filter((u) => u.role === ROLE.AGENT && u.companyId === actor.companyId)
     if (agents.length === 0) return notFound()
 
     const open = store.tickets.filter(

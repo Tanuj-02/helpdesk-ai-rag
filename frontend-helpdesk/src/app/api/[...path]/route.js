@@ -267,7 +267,7 @@ async function handle(request, { params }) {
     }
 
     const raw = path === "invitation/send" ? sanitizeInvitation(result.json) : result.json
-    const loggedIn = path === "auth/login" && result.status === 200 && raw?.token
+    const loggedIn = (path === "auth/login" || path === "auth/register") && result.status === 200 && raw?.token
 
     // The token goes into an httpOnly cookie and is stripped from the body, so
     // it is never readable by page script. The display name is kept in a
@@ -352,7 +352,7 @@ async function handle(request, { params }) {
     return normalizeError(403)
   }
 
-  const isLogin = path === "auth/login" && upstream.status === 200
+  const isLogin = (path === "auth/login" || path === "auth/register") && upstream.status === 200
   const isInvitation = path === "invitation/send" && upstream.ok
 
   if (isLogin || isInvitation) {

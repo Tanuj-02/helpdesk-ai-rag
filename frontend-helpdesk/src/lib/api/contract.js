@@ -43,6 +43,22 @@
  */
 
 /**
+ * @typedef {Object} RegisterCompanyRequest
+ * @property {string} companyName
+ * @property {string} companyEmail
+ * @property {string} adminName
+ * @property {string} adminEmail
+ * @property {string} password
+ */
+
+/**
+ * @typedef {Object} InvitationRegistrationRequest
+ * @property {string} token invitation token from the email link
+ * @property {string} name
+ * @property {string} password
+ */
+
+/**
  * @typedef {Object} LoginResponse
  * @property {string} token  Bearer JWT: claims are sub(email), userId, companyId, role, iat, exp
  * @property {import("@/lib/constants").Role} role

@@ -45,7 +45,7 @@ export function LandingPage({ session }) {
         <nav aria-label="Main navigation">
           <a href="#features">The experience</a><a href="#how-it-works">How it works</a><a href="#roles">Your team</a>
         </nav>
-        <div className="flex items-center gap-2"><ThemeToggle /><Link className="landing-button small" href={destination}>{session ? "Workspace" : "Sign in"}<ArrowRight aria-hidden /></Link></div>
+        <div className="flex items-center gap-2"><ThemeToggle />{!session ? <Link className="text-[12px] font-medium text-muted-foreground hover:text-foreground" href="/register-company">Create workspace</Link> : null}<Link className="landing-button small" href={destination}>{session ? "Workspace" : "Sign in"}<ArrowRight aria-hidden /></Link></div>
       </header>
 
       <main id="main-content">
@@ -108,7 +108,7 @@ export function LandingPage({ session }) {
           <div className="privacy-note"><LockKey aria-hidden /><p><strong>Your workspace is your own.</strong> Documents, conversations, and tickets are scoped to your company.</p></div>
         </section>
 
-        <section className="landing-container closing-section" data-reveal><span className="eyebrow">A LITTLE LESS FRICTION. A LITTLE MORE FLOW.</span><h2>Make room for<br /><span className="serif-accent">better work.</span></h2><Link href={destination} className="landing-button">{session ? "Back to your workspace" : "Sign in to your workspace"}<ArrowRight aria-hidden /></Link><p>Use the work email your administrator invited.</p></section>
+        <section className="landing-container closing-section" data-reveal><span className="eyebrow">A LITTLE LESS FRICTION. A LITTLE MORE FLOW.</span><h2>Make room for<br /><span className="serif-accent">better work.</span></h2><Link href={destination} className="landing-button">{session ? "Back to your workspace" : "Sign in to your workspace"}<ArrowRight aria-hidden /></Link><p>Have a company to bring in? <Link href="/register-company" className="underline underline-offset-4">Create a workspace.</Link></p></section>
       </main>
       <footer className="landing-footer landing-container"><BrandMark /><span>Knowledge connects us. Support moves us forward.</span><a href="#main-content">Back to top ↑</a></footer>
     </div>

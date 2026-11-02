@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowRight, LockKey } from "@phosphor-icons/react"
 
@@ -15,6 +16,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/password-input"
 import { Spinner } from "@/components/ui/spinner"
 
 /**
@@ -76,21 +78,19 @@ export function LoginForm({ className, ...props }) {
               className="h-9"
             />
             <FieldDescription>
-              Use the address your workspace admin invited.
+              Use the email linked to your workspace account.
             </FieldDescription>
           </Field>
 
           <Field>
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               required
               autoComplete="current-password"
               disabled={pending}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-9"
             />
           </Field>
 
@@ -121,6 +121,12 @@ export function LoginForm({ className, ...props }) {
               setError(null)
             }}
           />
+          <p className="text-center text-[12px] text-muted-foreground">
+            Starting a new company?{" "}
+            <Link href="/register-company" className="font-medium text-primary hover:underline">
+              Create a workspace
+            </Link>
+          </p>
         </FieldGroup>
       </form>
     </div>

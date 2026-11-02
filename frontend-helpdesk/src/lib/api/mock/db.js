@@ -55,6 +55,8 @@ const daysAgo = (d) => new Date(now - d * 86_400_000).toISOString()
  * @property {string} role
  * @property {string} status
  * @property {number} companyId
+ * @property {string} [companyName]
+ * @property {string} [companyEmail]
  * @property {string} createAt
  */
 
@@ -411,6 +413,7 @@ let nextTicketId = 1100
 let nextConversationId = 600
 let nextDocumentId = 800
 let nextUserId = 20
+let nextCompanyId = 2
 let nextTicketMessageId = 960
 
 export const store = {
@@ -437,6 +440,7 @@ export const store = {
     nextConversationId = 600
     nextDocumentId = 800
     nextUserId = 20
+    nextCompanyId = 2
     nextTicketMessageId = 960
   },
 
@@ -444,6 +448,7 @@ export const store = {
   nextConversationId: () => nextConversationId++,
   nextDocumentId: () => nextDocumentId++,
   nextUserId: () => nextUserId++,
+  nextCompanyId: () => nextCompanyId++,
   nextTicketMessageId: () => nextTicketMessageId++,
 }
 
